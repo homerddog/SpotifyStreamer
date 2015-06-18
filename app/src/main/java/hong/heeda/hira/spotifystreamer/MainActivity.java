@@ -1,11 +1,8 @@
 package hong.heeda.hira.spotifystreamer;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +14,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_main);
     }
 
     @Override
@@ -33,11 +30,10 @@ public class MainActivity extends Activity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Intent intent = new Intent(getApplication(), MainActivity.class);
-                intent.putExtra(Intent.EXTRA_TEXT, query);
-                intent.setAction(Intent.ACTION_SEARCH);
+                ArtistsFragment fragment = (ArtistsFragment)
+                        getFragmentManager().findFragmentById(R.id.fragment_main);
 
-                startActivity(intent);
+                fragment.startSearch(query);
 
                 return true;
             }
@@ -64,24 +60,5 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        setIntent(intent);
-
-        Fragment fragment = new ArtistsFragment();
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-
-        ft.add(R.id.spotify_home, fragment).commit();
-
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(Intent.EXTRA_TEXT);
-            new ArtistsFragment.FetchArtistTask().execute(query);
-        }
     }
 }
