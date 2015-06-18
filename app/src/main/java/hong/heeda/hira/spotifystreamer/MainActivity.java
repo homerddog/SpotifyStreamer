@@ -8,8 +8,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SearchView;
 
+import kaaes.spotify.webapi.android.models.Artist;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements
+        ArtistsFragment.OnArtistSelectedListener {
+
+    ArtistsFragment artistsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,10 +34,10 @@ public class MainActivity extends Activity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                ArtistsFragment fragment = (ArtistsFragment)
+                artistsFragment = (ArtistsFragment)
                         getFragmentManager().findFragmentById(R.id.fragment_main);
 
-                fragment.startSearch(query);
+                artistsFragment.startSearch(query);
 
                 return true;
             }
@@ -49,9 +53,6 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -60,5 +61,10 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void OnArtistSelected(int artistPosition) {
+        Artist artist = (Artist) artistsFragment.getListAdapter().getItem(artistPosition);
     }
 }

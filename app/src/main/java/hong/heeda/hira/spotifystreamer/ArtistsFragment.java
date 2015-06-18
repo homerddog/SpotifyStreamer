@@ -1,5 +1,6 @@
 package hong.heeda.hira.spotifystreamer;
 
+import android.app.Activity;
 import android.app.ListFragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +18,11 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 
-/**
- * Created by heeda on 6/16/15.
- */
 public class ArtistsFragment extends ListFragment {
 
     private final String LOG_TAG = ArtistsFragment.class.getSimpleName();
+
+    OnArtistSelectedListener mCallback;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -40,23 +41,30 @@ public class ArtistsFragment extends ListFragment {
         return rootView;
     }
 
-//    @Override
-//    public void onAttach(Activity activity) {
-//        super.onAttach(activity);
-//
-//        try {
-//            mCallback = (OnArtistSearchListener) activity;
-//
-//            mCallback.StartSearch();
-//        } catch (ClassCastException e) {
-//            throw new ClassCastException(activity.toString()
-//                + " must implement onArtistSearchListener");
-//        }
-//    }
+    @Override
+    public void onListItemClick(ListView l,
+                                View v,
+                                int position,
+                                long id) {
+        mCallback.OnArtistSelected(position);
+    }
 
-//    public interface OnArtistSearchListener {
-//        public void StartSearch(String artist);
-//    }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallback = (OnArtistSelectedListener) activity;
+
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement onArtistSearchListener");
+        }
+    }
+
+    public interface OnArtistSelectedListener {
+        void OnArtistSelected(int artist);
+    }
 
     public void startSearch(String artist) {
         new FetchArtistTask().execute(artist);
@@ -74,6 +82,7 @@ public class ArtistsFragment extends ListFragment {
         private final String LOG_TAG = FetchArtistTask.class.getSimpleName();
 
         protected List<Artist> doInBackground(String... params) {
+            //TODO: handle retrofit exceptions
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotifyService = api.getService();
 
