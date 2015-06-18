@@ -26,6 +26,11 @@
                 android:value="@xml/searchable"/>
 
         </activity>
+
+        <activity
+            android:name=".ArtistTopTracksActivity"
+            android:label="@string/top_tracks_label"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

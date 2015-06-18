@@ -5,24 +5,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.Track;
 
-public class ArtistAdapter extends ArrayAdapter<Artist> {
+public class TrackAdapter extends ArrayAdapter<Track>{
 
     private Context context;
-    private List<Artist> artists;
+    private List<Track> artists;
     private LayoutInflater mInflater;
 
-    public ArtistAdapter(Context context,
+    public TrackAdapter(Context context,
                          int resource,
-                         List<Artist> artists) {
+                         List<Track> artists) {
         super(context, resource, artists);
 
         this.context = context;
@@ -42,15 +39,9 @@ public class ArtistAdapter extends ArrayAdapter<Artist> {
         }
 
         TextView artistTextView = (TextView) view.findViewById(R.id.artist_text_view);
-        
-        Artist artist = getItem(position);
-        artistTextView.setText(artist.name);
 
-        ImageView artistImage = (ImageView) view.findViewById(R.id.artist_image);
-
-        if (artist.images.size() > 2) {
-            Picasso.with(context).load(artist.images.get(2).url).into(artistImage);
-        }
+        Track track = getItem(position);
+        artistTextView.setText(track.name);
 
         return view;
     }

@@ -3,6 +3,7 @@ package hong.heeda.hira.spotifystreamer;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +15,7 @@ public class MainActivity extends Activity implements
         ArtistsFragment.OnArtistSelectedListener {
 
     ArtistsFragment artistsFragment;
+    public final static String ARTIST_NAME = "ARTIST_NAME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,5 +68,11 @@ public class MainActivity extends Activity implements
     @Override
     public void OnArtistSelected(int artistPosition) {
         Artist artist = (Artist) artistsFragment.getListAdapter().getItem(artistPosition);
+
+        Intent intent = new Intent(this, ArtistTopTracksActivity.class);
+        intent.putExtra(Intent.EXTRA_TEXT, artist.id);
+        intent.putExtra(ARTIST_NAME, artist.name);
+
+        startActivity(intent);
     }
 }
