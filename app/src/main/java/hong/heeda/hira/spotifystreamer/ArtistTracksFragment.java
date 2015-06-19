@@ -3,6 +3,7 @@ package hong.heeda.hira.spotifystreamer;
 import android.app.ListFragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,8 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 
 public class ArtistTracksFragment extends ListFragment {
+
+    private static final String LOG_TAG = ArtistTracksFragment.class.getSimpleName();
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -52,28 +55,44 @@ public class ArtistTracksFragment extends ListFragment {
 
     private void onTaskComplete(List<Track> result) {
         if (result.size() == 0) {
-            Toast.makeText(getActivity(), "Artist not found.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(),
+                    getString(R.string.no_tracks),
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ArrayAdapter<Track> artistAdapter = (ArrayAdapter<Track>) getListAdapter();
-        artistAdapter.clear();
+        ArrayAdapter<Track> trackAdapter = (ArrayAdapter<Track>) getListAdapter();
+        trackAdapter.clear();
+        trackAdapter.addAll(result);
 
-        artistAdapter.addAll(result);
+        setListAdapter(trackAdapter);
     }
 
     private class FetchArtistTracks extends AsyncTask<String, Void, List<Track>> {
 
         @Override
         protected List<Track> doInBackground(String... params) {
-            //TODO: handle retrofit exceptions
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService spotifyService = api.getService();
+            List<Track> tracks = new ArrayList<Track>();
 
-            Map<String, Object> queryMap = new HashMap<String, Object>() {};
-            queryMap.put("country", "US");
+            try {
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService spotifyService = api.getService();
 
-            return spotifyService.getArtistTopTrack(params[0], queryMap).tracks;
+                Map<String, Object> queryMap = new HashMap<String, Object>() {
+                };
+
+                queryMap.put("country", "US");
+
+                tracks = spotifyService.getArtistTopTrack(params[0], queryMap).tracks;
+            } catch (Exception e) {
+                Toast.makeText(getActivity(),
+                        getString(R.string.load_tracks_error),
+                        Toast.LENGTH_LONG).show();
+
+                Log.e(LOG_TAG, e.getMessage());
+            }
+
+            return tracks;
         }
 
         @Override

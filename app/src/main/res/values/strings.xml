@@ -3,6 +3,12 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="action_search">Search</string>
+    <string name="action_search">Search Artist</string>
     <string name="top_tracks_label">Top 10 Tracks</string>
+
+    <string name="load_tracks_error">"Failed to load tracks.  Try again later."</string>
+    <string name="no_artists">Artist not found.</string>
+    <string name="no_tracks">No tracks found</string>
+    <string name="load_artists_error">Failed artist search.  Try again later.</string>
+    <string name="no_network">"No Network Connection"</string>
 </resources>

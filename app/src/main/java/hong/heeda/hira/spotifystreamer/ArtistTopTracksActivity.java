@@ -30,6 +30,8 @@ public class ArtistTopTracksActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
+        menu.removeItem(R.id.action_search);
+
         return true;
     }
 }
