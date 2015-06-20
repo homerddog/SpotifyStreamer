@@ -12,7 +12,6 @@ public class ArtistTopTracksActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracks);
 
-        //TODO: handle this more elegantly...
         Intent intent = getIntent();
 
         String artistId = intent.getStringExtra(Intent.EXTRA_TEXT);
@@ -21,15 +20,16 @@ public class ArtistTopTracksActivity extends Activity {
         getActionBar().setSubtitle(artistName);
 
         ArtistTracksFragment fragment = (ArtistTracksFragment)
-                getFragmentManager ().findFragmentById(R.id.fragment_main);
+                getFragmentManager().findFragmentById(R.id.fragment_main);
 
-        fragment.retrieveTracks(artistId);
+        if (fragment != null) {
+            fragment.retrieveTracks(artistId);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-
         menu.removeItem(R.id.action_search);
 
         return true;

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SearchView;
@@ -17,28 +16,11 @@ public class MainActivity extends Activity
 
     private ArtistsFragment artistsFragment;
     private SearchView mSearchView;
-    private String artistQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if (savedInstanceState != null) {
-            artistQuery = savedInstanceState.getString(ARTIST_NAME);
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        artistQuery = savedInstanceState.getString(ARTIST_NAME);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(ARTIST_NAME, mSearchView.getQuery().toString());
     }
 
     @Override
@@ -54,10 +36,6 @@ public class MainActivity extends Activity
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         mSearchView.setOnQueryTextListener(this);
-
-        if (!TextUtils.isEmpty(artistQuery)) {
-            onQueryTextSubmit(artistQuery);
-        }
 
         return true;
     }

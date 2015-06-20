@@ -1,6 +1,7 @@
 package hong.heeda.hira.spotifystreamer;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +12,9 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
+import java.util.ArrayList;
 
-import kaaes.spotify.webapi.android.models.Artist;
-
-public class ArtistAdapter extends ArrayAdapter<Artist> {
+public class ArtistAdapter extends ArrayAdapter<ArtistInfo> {
 
     private static final String LOG_TAG = ArtistAdapter.class.getSimpleName();
 
@@ -24,7 +23,7 @@ public class ArtistAdapter extends ArrayAdapter<Artist> {
 
     public ArtistAdapter(Context context,
                          int resource,
-                         List<Artist> objects) {
+                         ArrayList<ArtistInfo> objects) {
         super(context, resource, objects);
 
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -44,7 +43,7 @@ public class ArtistAdapter extends ArrayAdapter<Artist> {
         TextView artistTextView = (TextView) view.findViewById(R.id.artist_text_view);
         ImageView artistImage = (ImageView) view.findViewById(R.id.artist_image);
 
-        Artist artist = getItem(position);
+        ArtistInfo artist = getItem(position);
         artistTextView.setText(artist.name);
 
         DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
@@ -52,9 +51,9 @@ public class ArtistAdapter extends ArrayAdapter<Artist> {
 
         artistImage.setImageResource(R.mipmap.ic_launcher);
 
-        if (artist.images.size() > 0) {
+        if (!TextUtils.isEmpty(artist.imageUrl)) {
             Picasso.with(mContext)
-                    .load(artist.images.get(0).url)
+                    .load(artist.imageUrl)
                     .resize(size, size)
                     .into(artistImage);
         }

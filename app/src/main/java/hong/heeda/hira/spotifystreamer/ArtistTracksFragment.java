@@ -19,30 +19,55 @@ import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
+import retrofit.RetrofitError;
 
 public class ArtistTracksFragment extends Fragment {
 
     private static final String LOG_TAG = ArtistTracksFragment.class.getSimpleName();
+    private static final String TRACK_LIST = "TRACK_LIST";
 
-    private ArrayAdapter<Track> trackAdapter;
+    private ArrayAdapter<TrackInfo> mTrackAdapter;
+    private ListView mTrackListView;
+    private ArrayList<TrackInfo> mTracks;
+
+    public ArtistTracksFragment() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-
-        trackAdapter = new TrackAdapter(
-                getActivity(),
-                R.layout.artist_list_item,
-                new ArrayList<Track>()
-        );
-
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        ListView lv = (ListView) rootView.findViewById(R.id.artist_list_view);
-
-        lv.setAdapter(trackAdapter);
+        mTrackListView = (ListView) rootView.findViewById(R.id.artist_list_view);
+        mTrackListView.setAdapter(mTrackAdapter);
 
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mTracks = (ArrayList<TrackInfo>) savedInstanceState.get(TRACK_LIST);
+        } else {
+            mTracks = new ArrayList<>();
+        }
+
+        mTrackAdapter = new TrackAdapter(
+                getActivity(),
+                R.layout.artist_list_item,
+                mTracks
+        );
+
+        mTrackAdapter.notifyDataSetChanged();
+        mTrackListView.setAdapter(mTrackAdapter);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(TRACK_LIST, mTracks);
     }
 
     public void retrieveTracks(String artistId) {
@@ -57,18 +82,24 @@ public class ArtistTracksFragment extends Fragment {
             return;
         }
 
-        trackAdapter.clear();
-        trackAdapter.addAll(result);
+        mTrackAdapter.clear();
+        for (Track track : result) {
+
+            String imageUrl = track.album.images.size() > 0 ? track.album.images.get(0).url : "";
+
+            mTrackAdapter.add(new TrackInfo(track.name,
+                    track.artists.get(0).name,
+                    track.album.name,
+                    imageUrl));
+        }
     }
 
     private class FetchArtistTracks extends AsyncTask<String, Void, List<Track>> {
 
-        private Exception exception = null;
+        private RetrofitError exception = null;
 
         @Override
         protected List<Track> doInBackground(String... params) {
-            List<Track> tracks = new ArrayList<Track>();
-
             try {
                 SpotifyApi api = new SpotifyApi();
                 SpotifyService spotifyService = api.getService();
@@ -78,13 +109,13 @@ public class ArtistTracksFragment extends Fragment {
 
                 queryMap.put("country", "US");
 
-                tracks = spotifyService.getArtistTopTrack(params[0], queryMap).tracks;
-            } catch (Exception e) {
+                return spotifyService.getArtistTopTrack(params[0], queryMap).tracks;
+            } catch (RetrofitError e) {
                 exception = e;
                 Log.e(LOG_TAG, e.getMessage());
             }
 
-            return tracks;
+            return new ArrayList<>();
         }
 
         @Override

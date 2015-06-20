@@ -1,6 +1,7 @@
 package hong.heeda.hira.spotifystreamer;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,9 +14,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Track;
-
-public class TrackAdapter extends ArrayAdapter<Track> {
+public class TrackAdapter extends ArrayAdapter<TrackInfo> {
 
     private static final String LOG_TAG = TrackAdapter.class.getSimpleName();
 
@@ -24,7 +23,7 @@ public class TrackAdapter extends ArrayAdapter<Track> {
 
     public TrackAdapter(Context context,
                         int resource,
-                        List<Track> artists) {
+                        List<TrackInfo> artists) {
         super(context, resource, artists);
         this.context = context;
         this.mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -40,21 +39,23 @@ public class TrackAdapter extends ArrayAdapter<Track> {
             view = mInflater.inflate(R.layout.track_list_item, parent, false);
         }
 
-        Track track = getItem(position);
+        TrackInfo track = getItem(position);
 
         TextView trackTextView = (TextView) view.findViewById(R.id.track_text_view);
         TextView albumTextView = (TextView) view.findViewById(R.id.album_text_view);
         ImageView trackImage = (ImageView) view.findViewById(R.id.track_image);
 
         trackTextView.setText(track.name);
-        albumTextView.setText(track.album.name);
+        albumTextView.setText(track.album);
 
         DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
         int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
 
-        if (track.album.images.size() > 0) {
+        trackImage.setImageResource(R.mipmap.ic_launcher);
+
+        if (!TextUtils.isEmpty(track.imageUrl)) {
             Picasso.with(context)
-                    .load(track.album.images.get(0).url)
+                    .load(track.imageUrl)
                     .resize(size, size)
                     .into(trackImage);
         }

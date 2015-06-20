@@ -18,14 +18,16 @@ import java.util.List;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
+import retrofit.RetrofitError;
 
 public class ArtistsFragment extends Fragment {
 
     private final String LOG_TAG = ArtistsFragment.class.getSimpleName();
     private final String ARTIST_QUERY_KEY = "ARTIST_KEY";
 
-    private ArtistAdapter artistAdapter;
-    private String artistToSearch;
+    private ArtistAdapter mArtistAdapter;
+    private ListView mArtistListView;
+    private ArrayList<ArtistInfo> mArtists;
 
     public ArtistsFragment() {
     }
@@ -39,28 +41,17 @@ public class ArtistsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-
-        if (savedInstanceState != null) {
-            artistToSearch = savedInstanceState.getString(ARTIST_QUERY_KEY);
-        }
-
-        artistAdapter = new ArtistAdapter(
-                getActivity(),
-                R.layout.artist_list_item,
-                new ArrayList<Artist>()
-        );
-
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        ListView artistsListView = (ListView) rootView.findViewById(R.id.artist_list_view);
+        mArtistListView = (ListView) rootView.findViewById(R.id.artist_list_view);
 
-        artistsListView.setAdapter(artistAdapter);
-        artistsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mArtistListView.setAdapter(mArtistAdapter);
+        mArtistListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent,
                                     View view,
                                     int position,
                                     long id) {
-                Artist artist = artistAdapter.getItem(position);
+                ArtistInfo artist = mArtistAdapter.getItem(position);
 
                 Intent intent = new Intent(getActivity(), ArtistTopTracksActivity.class)
                         .putExtra(Intent.EXTRA_TEXT, artist.id)
@@ -74,43 +65,59 @@ public class ArtistsFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        startSearch(artistToSearch);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mArtists = (ArrayList<ArtistInfo>) savedInstanceState.get(ARTIST_QUERY_KEY);
+        } else {
+            mArtists = new ArrayList<>();
+        }
+
+        mArtistAdapter = new ArtistAdapter(
+                getActivity(),
+                R.layout.artist_list_item,
+                mArtists
+        );
+
+        mArtistAdapter.notifyDataSetChanged();
+        mArtistListView.setAdapter(mArtistAdapter);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(ARTIST_QUERY_KEY, artistToSearch);
+        outState.putSerializable(ARTIST_QUERY_KEY, mArtists);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        artistAdapter = null;
+        mArtistAdapter = null;
     }
 
     public void startSearch(String artist) {
         if (artist != null && !artist.isEmpty()) {
-            artistToSearch = artist;
             if (new NetworkManager().hasNetworkConnection(getActivity())) {
-                new FetchArtistTask().execute(artistToSearch);
+                new FetchArtistTask().execute(artist);
             } else {
-                Toast.makeText(getActivity(), "No Network Connection", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(),
+                        getString(R.string.no_network),
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     public void resetAdapter() {
-        artistAdapter.clear();
+        mArtistAdapter.clear();
+        mArtistAdapter.notifyDataSetChanged();
     }
 
     private class FetchArtistTask extends AsyncTask<String, Void, List<Artist>> {
 
         private final String LOG_TAG = FetchArtistTask.class.getSimpleName();
 
-        private Exception exception = null;
+        private RetrofitError exception = null;
 
         protected List<Artist> doInBackground(String... params) {
 
@@ -120,7 +127,7 @@ public class ArtistsFragment extends Fragment {
 
                 return spotifyService.searchArtists(params[0]).artists.items;
 
-            } catch (Exception e) {
+            } catch (RetrofitError e) {
                 exception = e;
                 Log.e(LOG_TAG, e.getMessage());
             }
@@ -147,7 +154,11 @@ public class ArtistsFragment extends Fragment {
             }
 
             resetAdapter();
-            artistAdapter.addAll(result);
+
+            for (Artist artist : result) {
+                String url = artist.images.size() > 0 ? artist.images.get(0).url : "";
+                mArtists.add(new ArtistInfo(artist.id, artist.name, url));
+            }
         }
     }
 }
