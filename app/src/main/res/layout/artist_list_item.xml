@@ -11,7 +11,7 @@
         android:id="@+id/artist_image"
         android:layout_width="86dp"
         android:layout_height="86dp"
-        android:src="@drawable/abc_ic_menu_copy_mtrl_am_alpha"/>
+        android:src="@mipmap/ic_launcher"/>
 
     <TextView
         android:id="@+id/artist_text_view"

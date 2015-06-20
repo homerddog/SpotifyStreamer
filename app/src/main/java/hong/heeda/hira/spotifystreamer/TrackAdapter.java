@@ -2,7 +2,6 @@ package hong.heeda.hira.spotifystreamer;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,25 +13,20 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 
-public class TrackAdapter extends ArrayAdapter<Track>{
+public class TrackAdapter extends ArrayAdapter<Track> {
 
     private static final String LOG_TAG = TrackAdapter.class.getSimpleName();
 
     private Context context;
-    private List<Track> artists;
     private LayoutInflater mInflater;
 
     public TrackAdapter(Context context,
-                         int resource,
-                         List<Track> artists) {
+                        int resource,
+                        List<Track> artists) {
         super(context, resource, artists);
-
         this.context = context;
-        this.artists = artists;
-
         this.mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -55,20 +49,16 @@ public class TrackAdapter extends ArrayAdapter<Track>{
         trackTextView.setText(track.name);
         albumTextView.setText(track.album.name);
 
-        try {
+        DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
+        int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
 
-            DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
-            int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-
-            Image image = track.album.images.get(0);
+        if (track.album.images.size() > 0) {
             Picasso.with(context)
-                    .load(image.url)
+                    .load(track.album.images.get(0).url)
                     .resize(size, size)
                     .into(trackImage);
-
-        } catch (IndexOutOfBoundsException e) {
-            Log.i(LOG_TAG, "Unable to load image for " + track.name);
         }
+
         return view;
     }
 }

@@ -11,4 +11,6 @@
     <string name="no_tracks">No tracks found</string>
     <string name="load_artists_error">Failed artist search.  Try again later.</string>
     <string name="no_network">"No Network Connection"</string>
+
+    <color name="deep_purple">#673AB7</color>
 </resources>

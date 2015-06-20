@@ -1,6 +1,6 @@
 package hong.heeda.hira.spotifystreamer;
 
-import android.app.ListFragment;
+import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -21,32 +20,29 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 
-public class ArtistTracksFragment extends ListFragment {
+public class ArtistTracksFragment extends Fragment {
 
     private static final String LOG_TAG = ArtistTracksFragment.class.getSimpleName();
+
+    private ArrayAdapter<Track> trackAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        ListAdapter trackAdapter = new TrackAdapter(
+        trackAdapter = new TrackAdapter(
                 getActivity(),
                 R.layout.artist_list_item,
                 new ArrayList<Track>()
         );
 
-        setListAdapter(trackAdapter);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        ListView lv = (ListView) rootView.findViewById(R.id.artist_list_view);
+
+        lv.setAdapter(trackAdapter);
 
         return rootView;
-    }
-
-    @Override
-    public void onListItemClick(ListView l,
-                                View v,
-                                int position,
-                                long id) {
     }
 
     public void retrieveTracks(String artistId) {
@@ -61,14 +57,13 @@ public class ArtistTracksFragment extends ListFragment {
             return;
         }
 
-        ArrayAdapter<Track> trackAdapter = (ArrayAdapter<Track>) getListAdapter();
         trackAdapter.clear();
         trackAdapter.addAll(result);
-
-        setListAdapter(trackAdapter);
     }
 
     private class FetchArtistTracks extends AsyncTask<String, Void, List<Track>> {
+
+        private Exception exception = null;
 
         @Override
         protected List<Track> doInBackground(String... params) {
@@ -85,10 +80,7 @@ public class ArtistTracksFragment extends ListFragment {
 
                 tracks = spotifyService.getArtistTopTrack(params[0], queryMap).tracks;
             } catch (Exception e) {
-                Toast.makeText(getActivity(),
-                        getString(R.string.load_tracks_error),
-                        Toast.LENGTH_LONG).show();
-
+                exception = e;
                 Log.e(LOG_TAG, e.getMessage());
             }
 
@@ -98,6 +90,14 @@ public class ArtistTracksFragment extends ListFragment {
         @Override
         protected void onPostExecute(List<Track> result) {
             super.onPostExecute(result);
+
+            if (exception != null) {
+                Toast.makeText(getActivity(),
+                        getString(R.string.load_tracks_error),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             onTaskComplete(result);
         }
     }

@@ -2,7 +2,6 @@ package hong.heeda.hira.spotifystreamer;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,24 +11,24 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.Image;
 
 public class ArtistAdapter extends ArrayAdapter<Artist> {
 
     private static final String LOG_TAG = ArtistAdapter.class.getSimpleName();
 
     private LayoutInflater mInflater;
-    private ArrayList<Artist> artists;
+    private Context mContext;
 
     public ArtistAdapter(Context context,
                          int resource,
-                         ArrayList<Artist> artists) {
-        super(context, resource, artists);
-        this.artists = artists;
-        this.mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                         List<Artist> objects) {
+        super(context, resource, objects);
+
+        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mContext = context;
     }
 
     @Override
@@ -48,24 +47,18 @@ public class ArtistAdapter extends ArrayAdapter<Artist> {
         Artist artist = getItem(position);
         artistTextView.setText(artist.name);
 
-        try {
+        DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
+        int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
 
-            DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
-            int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        artistImage.setImageResource(R.mipmap.ic_launcher);
 
-            Image image = artist.images.get(0);
-            Picasso.with(getContext())
-                    .load(image.url)
+        if (artist.images.size() > 0) {
+            Picasso.with(mContext)
+                    .load(artist.images.get(0).url)
                     .resize(size, size)
                     .into(artistImage);
-
-        } catch (IndexOutOfBoundsException e) {
-            Log.i(LOG_TAG, "Unable to load image for " + artist.name);
         }
-        return view;
-    }
 
-    public ArrayList<Artist> getArtists() {
-        return this.artists;
+        return view;
     }
 }
