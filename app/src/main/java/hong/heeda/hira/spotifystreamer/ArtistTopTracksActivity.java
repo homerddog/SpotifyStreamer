@@ -7,6 +7,8 @@ import android.view.Menu;
 
 public class ArtistTopTracksActivity extends Activity {
 
+    private String mArtistId;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -14,17 +16,10 @@ public class ArtistTopTracksActivity extends Activity {
 
         Intent intent = getIntent();
 
-        String artistId = intent.getStringExtra(Intent.EXTRA_TEXT);
+        mArtistId = intent.getStringExtra(Intent.EXTRA_TEXT);
         String artistName = intent.getStringExtra(MainActivity.ARTIST_NAME);
 
         getActionBar().setSubtitle(artistName);
-
-        ArtistTracksFragment fragment = (ArtistTracksFragment)
-                getFragmentManager().findFragmentById(R.id.fragment_main);
-
-        if (fragment != null) {
-            fragment.retrieveTracks(artistId);
-        }
     }
 
     @Override
@@ -33,5 +28,9 @@ public class ArtistTopTracksActivity extends Activity {
         menu.removeItem(R.id.action_search);
 
         return true;
+    }
+
+    public String getArtistId() {
+        return mArtistId;
     }
 }

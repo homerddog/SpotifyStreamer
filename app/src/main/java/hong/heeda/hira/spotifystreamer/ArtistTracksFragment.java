@@ -34,6 +34,11 @@ public class ArtistTracksFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
@@ -52,6 +57,7 @@ public class ArtistTracksFragment extends Fragment {
             mTracks = (ArrayList<TrackInfo>) savedInstanceState.get(TRACK_LIST);
         } else {
             mTracks = new ArrayList<>();
+            retrieveTracks(((ArtistTopTracksActivity)getActivity()).getArtistId());
         }
 
         mTrackAdapter = new TrackAdapter(
