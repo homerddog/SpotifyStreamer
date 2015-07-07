@@ -1,11 +1,11 @@
 package hong.heeda.hira.spotifystreamer;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 
-public class ArtistTopTracksActivity extends Activity {
+public class ArtistTopTracksActivity extends AppCompatActivity {
 
     private String mArtistId;
 
@@ -19,7 +19,7 @@ public class ArtistTopTracksActivity extends Activity {
         mArtistId = intent.getStringExtra(Intent.EXTRA_TEXT);
         String artistName = intent.getStringExtra(MainActivity.ARTIST_NAME);
 
-        getActionBar().setSubtitle(artistName);
+        getSupportActionBar().setSubtitle(artistName);
     }
 
     @Override

@@ -1,9 +1,9 @@
 package hong.heeda.hira.spotifystreamer;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,7 +97,7 @@ public class ArtistsFragment extends Fragment {
     }
 
     public void startSearch(String artist) {
-        if (artist != null && !artist.isEmpty()) {
+        if (artist != null) {
             if (new NetworkManager().hasNetworkConnection(getActivity())) {
                 new FetchArtistTask().execute(artist);
             } else {

@@ -1,8 +1,8 @@
 package hong.heeda.hira.spotifystreamer;
 
-import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +57,7 @@ public class ArtistTracksFragment extends Fragment {
             mTracks = (ArrayList<TrackInfo>) savedInstanceState.get(TRACK_LIST);
         } else {
             mTracks = new ArrayList<>();
-            retrieveTracks(((ArtistTopTracksActivity)getActivity()).getArtistId());
+//            retrieveTracks(((ArtistTopTracksActivity) getActivity()).getArtistId());
         }
 
         mTrackAdapter = new TrackAdapter(

@@ -1,43 +1,55 @@
 package hong.heeda.hira.spotifystreamer;
 
-import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.SearchView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity
-        implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
+public class MainActivity extends AppCompatActivity
+        implements SearchView.OnQueryTextListener, MenuItemCompat.OnActionExpandListener {
 
     public final static String ARTIST_NAME = "ARTIST_NAME";
 
     private ArtistsFragment artistsFragment;
-    private SearchView mSearchView;
+    private android.support.v7.widget.SearchView mSearchView;
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (findViewById(R.id.fragment_tracks) != null) {
+            //tablet view, or smallest width of 600
+            mTwoPane = true;
+
+            if (savedInstanceState == null) {
+
+
+            }
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        MenuItem menuItem = menu.findItem(R.id.action_search);
-        menuItem.setOnActionExpandListener(this);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        mSearchView.setQueryHint(getString(R.string.action_search));
-        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 
-        mSearchView.setOnQueryTextListener(this);
-
-        return true;
+        if (mSearchView != null) {
+            mSearchView.setQueryHint(getString(R.string.action_search));
+            mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            mSearchView.setOnQueryTextListener(this);
+        }
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -49,22 +61,20 @@ public class MainActivity extends Activity
                 return true;
             case R.id.action_search:
                 if (!new NetworkManager().hasNetworkConnection(this)) {
-                    item.collapseActionView();
+                    MenuItemCompat.collapseActionView(item);
                 }
                 return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        artistsFragment = (ArtistsFragment)
-                getFragmentManager().findFragmentById(R.id.fragment_main);
+        artistsFragment = ((ArtistsFragment)
+                getSupportFragmentManager().findFragmentById(R.id.fragment_artist));
 
         artistsFragment.startSearch(query);
         mSearchView.clearFocus();
-
         return true;
     }
 
@@ -79,10 +89,8 @@ public class MainActivity extends Activity
             Toast.makeText(getApplicationContext(),
                     getString(R.string.no_network),
                     Toast.LENGTH_SHORT).show();
-
             return false;
         }
-
         return true;
     }
 
@@ -91,7 +99,6 @@ public class MainActivity extends Activity
         if (artistsFragment != null) {
             artistsFragment.resetAdapter();
         }
-
         return true;
     }
 }

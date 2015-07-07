@@ -13,6 +13,7 @@ public class ArtistInfo implements Parcelable {
             return new ArtistInfo[size];
         }
     };
+
     public String id;
     public String name;
     public String imageUrl;
@@ -42,5 +43,29 @@ public class ArtistInfo implements Parcelable {
         dest.writeString(this.id);
         dest.writeString(this.name);
         dest.writeString(this.imageUrl);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

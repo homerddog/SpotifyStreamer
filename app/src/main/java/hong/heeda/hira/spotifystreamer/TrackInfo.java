@@ -13,6 +13,7 @@ public class TrackInfo implements Parcelable {
             return new TrackInfo[size];
         }
     };
+
     public String name;
     public String artist;
     public String album;
@@ -47,5 +48,37 @@ public class TrackInfo implements Parcelable {
         dest.writeString(this.artist);
         dest.writeString(this.album);
         dest.writeString(this.imageUrl);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
