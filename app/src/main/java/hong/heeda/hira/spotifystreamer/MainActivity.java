@@ -2,6 +2,7 @@ package hong.heeda.hira.spotifystreamer;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -11,12 +12,13 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
-        implements SearchView.OnQueryTextListener, MenuItemCompat.OnActionExpandListener {
+        implements SearchView.OnQueryTextListener,
+        MenuItemCompat.OnActionExpandListener, ArtistsFragment.Callback {
 
     public final static String ARTIST_NAME = "ARTIST_NAME";
 
     private ArtistsFragment artistsFragment;
-    private android.support.v7.widget.SearchView mSearchView;
+    private SearchView mSearchView;
     private boolean mTwoPane;
 
     @Override
@@ -29,9 +31,15 @@ public class MainActivity extends AppCompatActivity
             mTwoPane = true;
 
             if (savedInstanceState == null) {
-
-
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_tracks,
+                                new ArtistTracksFragment(),
+                                ArtistTracksFragment.TRACKSFRAGMENT_TAG)
+                        .commit();
             }
+        } else {
+            mTwoPane = false;
+            getSupportActionBar().setElevation(0f);
         }
     }
 
@@ -100,5 +108,27 @@ public class MainActivity extends AppCompatActivity
             artistsFragment.resetAdapter();
         }
         return true;
+    }
+
+    @Override
+    public void onItemSelected(ArtistInfo artist) {
+        if (mTwoPane) {
+            Bundle args = new Bundle();
+            args.putString(MainActivity.ARTIST_NAME, artist.getId());
+
+            ArtistTracksFragment fragment = new ArtistTracksFragment();
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_tracks, fragment, ArtistsFragment.ARTISTFRAGMENT_TAG)
+                    .commit();
+
+            fragment.retrieveTracks(artist.getId());
+        } else {
+            Intent intent = new Intent(this, ArtistTopTracksActivity.class)
+                    .putExtra(Intent.EXTRA_TEXT, artist.getId())
+                    .putExtra(MainActivity.ARTIST_NAME, artist.getName());
+            startActivity(intent);
+        }
     }
 }

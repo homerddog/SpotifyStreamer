@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment
+<FrameLayout
+    android:id="@+id/fragment_container"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_artist"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:name="hong.heeda.hira.spotifystreamer.ArtistsFragment"
-    tools:layout="@layout/fragment_main"/>
+    android:layout_height="match_parent">
+
+    <fragment
+        android:id="@+id/fragment_artist"
+        android:name="hong.heeda.hira.spotifystreamer.ArtistsFragment"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="hong.heeda.hira.spotifystreamer.ArtistsFragment"
+        tools:layout="@android:layout/list_content"/>
+
+</FrameLayout>

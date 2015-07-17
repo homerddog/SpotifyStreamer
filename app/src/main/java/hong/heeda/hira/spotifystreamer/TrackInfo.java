@@ -14,10 +14,10 @@ public class TrackInfo implements Parcelable {
         }
     };
 
-    public String name;
-    public String artist;
-    public String album;
-    public String imageUrl;
+    private String name;
+    private String artist;
+    private String album;
+    private String imageUrl;
 
     public TrackInfo(String name,
                      String artist,

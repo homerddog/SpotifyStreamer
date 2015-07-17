@@ -45,17 +45,17 @@ public class TrackAdapter extends ArrayAdapter<TrackInfo> {
         TextView albumTextView = (TextView) view.findViewById(R.id.album_text_view);
         ImageView trackImage = (ImageView) view.findViewById(R.id.track_image);
 
-        trackTextView.setText(track.name);
-        albumTextView.setText(track.album);
+        trackTextView.setText(track.getName());
+        albumTextView.setText(track.getAlbum());
 
         DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
         int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
 
         trackImage.setImageResource(R.mipmap.ic_launcher);
 
-        if (!TextUtils.isEmpty(track.imageUrl)) {
+        if (!TextUtils.isEmpty(track.getImageUrl())) {
             Picasso.with(context)
-                    .load(track.imageUrl)
+                    .load(track.getImageUrl())
                     .resize(size, size)
                     .into(trackImage);
         }

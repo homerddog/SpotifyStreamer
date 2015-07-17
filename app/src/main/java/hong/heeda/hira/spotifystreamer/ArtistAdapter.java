@@ -44,16 +44,16 @@ public class ArtistAdapter extends ArrayAdapter<ArtistInfo> {
         ImageView artistImage = (ImageView) view.findViewById(R.id.artist_image);
 
         ArtistInfo artist = getItem(position);
-        artistTextView.setText(artist.name);
+        artistTextView.setText(artist.getName());
 
         DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
         int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
 
         artistImage.setImageResource(R.mipmap.ic_launcher);
 
-        if (!TextUtils.isEmpty(artist.imageUrl)) {
+        if (!TextUtils.isEmpty(artist.getImageUrl())) {
             Picasso.with(mContext)
-                    .load(artist.imageUrl)
+                    .load(artist.getImageUrl())
                     .resize(size, size)
                     .into(artistImage);
         }

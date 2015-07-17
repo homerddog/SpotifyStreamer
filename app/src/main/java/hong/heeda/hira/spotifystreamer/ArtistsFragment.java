@@ -1,6 +1,5 @@
 package hong.heeda.hira.spotifystreamer;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,6 +21,7 @@ import retrofit.RetrofitError;
 
 public class ArtistsFragment extends Fragment {
 
+    public static final String ARTISTFRAGMENT_TAG = "AF_TAG";
     private final String LOG_TAG = ArtistsFragment.class.getSimpleName();
     private final String ARTIST_QUERY_KEY = "ARTIST_KEY";
 
@@ -42,7 +42,7 @@ public class ArtistsFragment extends Fragment {
                              ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        mArtistListView = (ListView) rootView.findViewById(R.id.artist_list_view);
+        mArtistListView = (ListView) rootView.findViewById(R.id.list_view);
 
         mArtistListView.setAdapter(mArtistAdapter);
         mArtistListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -51,15 +51,15 @@ public class ArtistsFragment extends Fragment {
                                     View view,
                                     int position,
                                     long id) {
-                ArtistInfo artist = mArtistAdapter.getItem(position);
-
-                Intent intent = new Intent(getActivity(), ArtistTopTracksActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, artist.id)
-                        .putExtra(MainActivity.ARTIST_NAME, artist.name);
-
-                startActivity(intent);
+                ((Callback)getActivity())
+                        .onItemSelected(((ArtistInfo)parent.getAdapter().getItem(position)));
             }
         });
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(ARTIST_QUERY_KEY)) {
+            mArtists = (ArrayList<ArtistInfo>) savedInstanceState.get(ARTIST_QUERY_KEY);
+            setArtistAdapter();
+        }
 
         return rootView;
     }
@@ -74,14 +74,7 @@ public class ArtistsFragment extends Fragment {
             mArtists = new ArrayList<>();
         }
 
-        mArtistAdapter = new ArtistAdapter(
-                getActivity(),
-                R.layout.artist_list_item,
-                mArtists
-        );
-
-        mArtistAdapter.notifyDataSetChanged();
-        mArtistListView.setAdapter(mArtistAdapter);
+        setArtistAdapter();
     }
 
     @Override
@@ -111,6 +104,30 @@ public class ArtistsFragment extends Fragment {
     public void resetAdapter() {
         mArtistAdapter.clear();
         mArtistAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement.  This allows activities to be notified of item selections.
+     */
+    public interface Callback {
+        /**
+         * ArtistsFragment callback, for when an item is selected.
+         *
+         * @param artist The selected Artist.
+         */
+        void onItemSelected(ArtistInfo artist);
+    }
+
+    private void setArtistAdapter() {
+        mArtistAdapter = new ArtistAdapter(
+                getActivity(),
+                R.layout.artist_list_item,
+                mArtists
+        );
+
+        mArtistAdapter.notifyDataSetChanged();
+        mArtistListView.setAdapter(mArtistAdapter);
     }
 
     private class FetchArtistTask extends AsyncTask<String, Void, List<Artist>> {

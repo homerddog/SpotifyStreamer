@@ -10,10 +10,8 @@ public class NetworkManager {
             return false;
         }
 
-        ConnectivityManager cm =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        NetworkInfo activeNetwork = ((ConnectivityManager) context.getSystemService(
+                Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
 
         return activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();

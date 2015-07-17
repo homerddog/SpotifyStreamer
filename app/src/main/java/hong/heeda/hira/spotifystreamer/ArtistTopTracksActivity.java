@@ -14,12 +14,26 @@ public class ArtistTopTracksActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracks);
 
-        Intent intent = getIntent();
+        if (savedInstanceState == null) {
+            Intent intent = getIntent();
+            Bundle arguments = new Bundle();
+            String artistName = intent.getStringExtra(MainActivity.ARTIST_NAME);
+            mArtistId = intent.getStringExtra(Intent.EXTRA_TEXT);
 
-        mArtistId = intent.getStringExtra(Intent.EXTRA_TEXT);
-        String artistName = intent.getStringExtra(MainActivity.ARTIST_NAME);
+            arguments.putString(MainActivity.ARTIST_NAME, artistName);
+            arguments.putString(Intent.EXTRA_TEXT, mArtistId);
 
-        getSupportActionBar().setSubtitle(artistName);
+            getSupportActionBar().setSubtitle(artistName);
+
+            ArtistTracksFragment fragment = new ArtistTracksFragment();
+            fragment.setArguments(arguments);
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.frame_layout_main, fragment)
+                    .commit();
+
+            fragment.retrieveTracks(mArtistId);
+        }
     }
 
     @Override

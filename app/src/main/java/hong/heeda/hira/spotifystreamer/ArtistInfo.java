@@ -14,9 +14,9 @@ public class ArtistInfo implements Parcelable {
         }
     };
 
-    public String id;
-    public String name;
-    public String imageUrl;
+    private String id;
+    private String name;
+    private String imageUrl;
 
     public ArtistInfo(String id,
                       String name,

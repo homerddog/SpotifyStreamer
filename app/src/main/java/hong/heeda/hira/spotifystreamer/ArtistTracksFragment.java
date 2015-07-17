@@ -23,6 +23,7 @@ import retrofit.RetrofitError;
 
 public class ArtistTracksFragment extends Fragment {
 
+    public static final String TRACKSFRAGMENT_TAG = "ATTAG";
     private static final String LOG_TAG = ArtistTracksFragment.class.getSimpleName();
     private static final String TRACK_LIST = "TRACK_LIST";
 
@@ -42,8 +43,8 @@ public class ArtistTracksFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        mTrackListView = (ListView) rootView.findViewById(R.id.artist_list_view);
+        View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
+        mTrackListView = (ListView) rootView.findViewById(R.id.list_view);
         mTrackListView.setAdapter(mTrackAdapter);
 
         return rootView;
@@ -57,15 +58,12 @@ public class ArtistTracksFragment extends Fragment {
             mTracks = (ArrayList<TrackInfo>) savedInstanceState.get(TRACK_LIST);
         } else {
             mTracks = new ArrayList<>();
-//            retrieveTracks(((ArtistTopTracksActivity) getActivity()).getArtistId());
         }
-
         mTrackAdapter = new TrackAdapter(
                 getActivity(),
                 R.layout.artist_list_item,
                 mTracks
         );
-
         mTrackAdapter.notifyDataSetChanged();
         mTrackListView.setAdapter(mTrackAdapter);
     }
@@ -87,10 +85,9 @@ public class ArtistTracksFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
             return;
         }
-
         mTrackAdapter.clear();
-        for (Track track : result) {
 
+        for (Track track : result) {
             String imageUrl = track.album.images.size() > 0 ? track.album.images.get(0).url : "";
 
             mTrackAdapter.add(new TrackInfo(track.name,
@@ -120,7 +117,6 @@ public class ArtistTracksFragment extends Fragment {
                 exception = e;
                 Log.e(LOG_TAG, e.getMessage());
             }
-
             return new ArrayList<>();
         }
 
@@ -134,7 +130,6 @@ public class ArtistTracksFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
                 return;
             }
-
             onTaskComplete(result);
         }
     }

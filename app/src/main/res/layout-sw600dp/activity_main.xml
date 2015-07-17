@@ -12,11 +12,11 @@
         android:name="hong.heeda.hira.spotifystreamer.ArtistsFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2"/>
+        android:layout_weight="2"
+        android:tag="AF_TAG"/>
 
-    <fragment
+    <FrameLayout
         android:id="@+id/fragment_tracks"
-        android:name="hong.heeda.hira.spotifystreamer.ArtistTracksFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="4"/>
