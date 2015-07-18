@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity
         implements SearchView.OnQueryTextListener,
         MenuItemCompat.OnActionExpandListener, ArtistsFragment.Callback {
 
-    public final static String ARTIST_NAME = "ARTIST_NAME";
+    public final static String ARTIST_INFO = "ARTIST_INFO";
 
     private ArtistsFragment artistsFragment;
     private SearchView mSearchView;
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity
     public void onItemSelected(ArtistInfo artist) {
         if (mTwoPane) {
             Bundle args = new Bundle();
-            args.putString(MainActivity.ARTIST_NAME, artist.getId());
+            args.putString(MainActivity.ARTIST_INFO, artist.getId());
 
             ArtistTracksFragment fragment = new ArtistTracksFragment();
             fragment.setArguments(args);
@@ -126,8 +126,8 @@ public class MainActivity extends AppCompatActivity
             fragment.retrieveTracks(artist.getId());
         } else {
             Intent intent = new Intent(this, ArtistTopTracksActivity.class)
-                    .putExtra(Intent.EXTRA_TEXT, artist.getId())
-                    .putExtra(MainActivity.ARTIST_NAME, artist.getName());
+                    .putExtra(MainActivity.ARTIST_INFO, artist);
+
             startActivity(intent);
         }
     }
