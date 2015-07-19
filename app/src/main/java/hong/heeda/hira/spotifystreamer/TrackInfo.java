@@ -18,15 +18,18 @@ public class TrackInfo implements Parcelable {
     private String artist;
     private String album;
     private String imageUrl;
+    private String previewUrl;
 
     public TrackInfo(String name,
                      String artist,
                      String album,
-                     String imageUrl) {
+                     String imageUrl,
+                     String previewUrl) {
         this.name = name;
         this.artist = artist;
         this.album = album;
         this.imageUrl = imageUrl;
+        this.previewUrl = previewUrl;
     }
 
     protected TrackInfo(Parcel in) {
@@ -34,6 +37,7 @@ public class TrackInfo implements Parcelable {
         this.artist = in.readString();
         this.album = in.readString();
         this.imageUrl = in.readString();
+        this.previewUrl = in.readString();
     }
 
     @Override
@@ -48,6 +52,7 @@ public class TrackInfo implements Parcelable {
         dest.writeString(this.artist);
         dest.writeString(this.album);
         dest.writeString(this.imageUrl);
+        dest.writeString(this.previewUrl);
     }
 
     public String getName() {
@@ -80,5 +85,13 @@ public class TrackInfo implements Parcelable {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getPreviewUrl() {
+        return this.previewUrl;
+    }
+
+    public void setPreviewUrl(String previewUrl) {
+        this.previewUrl = previewUrl;
     }
 }

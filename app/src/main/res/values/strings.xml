@@ -12,4 +12,5 @@
     <string name="no_network">"No Network Connection"</string>
 
     <color name="deep_purple">#673AB7</color>
+    <string name="title_activity_track_player">TrackPlayerActivity</string>
 </resources>

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -45,6 +46,16 @@ public class ArtistTracksFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
         mTrackListView = (ListView) rootView.findViewById(R.id.list_view);
+        mTrackListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent,
+                                    View view,
+                                    int position,
+                                    long id) {
+                ((Callback)getActivity())
+                        .onTrackSelected(((TrackInfo)parent.getAdapter().getItem(position)));
+            }
+        });
         mTrackListView.setAdapter(mTrackAdapter);
 
         return rootView;
@@ -78,6 +89,10 @@ public class ArtistTracksFragment extends Fragment {
         new FetchArtistTracks().execute(artistId);
     }
 
+    public interface Callback {
+        void onTrackSelected(TrackInfo track);
+    }
+
     private void onTaskComplete(List<Track> result) {
         if (result.size() == 0) {
             Toast.makeText(getActivity(),
@@ -93,7 +108,8 @@ public class ArtistTracksFragment extends Fragment {
             mTrackAdapter.add(new TrackInfo(track.name,
                     track.artists.get(0).name,
                     track.album.name,
-                    imageUrl));
+                    imageUrl,
+                    track.preview_url));
         }
     }
 
