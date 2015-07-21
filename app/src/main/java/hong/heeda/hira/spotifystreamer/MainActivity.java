@@ -26,10 +26,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (findViewById(R.id.fragment_tracks) != null) {
-            //tablet view, or smallest width of 600
-            mTwoPane = true;
+        mTwoPane = getResources().getBoolean(R.bool.large_layout);
 
+        if (mTwoPane) {
+            //tablet view, or smallest width of 600
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_tracks,
@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity
                         .commit();
             }
         } else {
-            mTwoPane = false;
             getSupportActionBar().setElevation(0f);
         }
     }

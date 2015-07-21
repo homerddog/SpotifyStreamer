@@ -42,6 +42,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="hong.heeda.hira.spotifystreamer.ArtistTopTracksActivity" />
         </activity>
+
+        <service
+            android:name=".service.TrackPlayer"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>
