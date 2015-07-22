@@ -1,17 +1,36 @@
 package hong.heeda.hira.spotifystreamer;
 
-import android.support.v7.app.AppCompatActivity;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class TrackPlayerActivity extends AppCompatActivity
-        implements ArtistTracksFragment.Callback {
+    implements PlayerFragment.OnFragmentInteractionListener {
+
+    private final String LOG_TAG = TrackPlayerActivity.class.getSimpleName();
+    private boolean mLargeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track_player);
+
+        mLargeLayout = getResources().getBoolean(R.bool.large_layout);
+
+        if (mLargeLayout) {
+
+        } else {
+            if (savedInstanceState == null) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.add(android.R.id.content, new PlayerFragment())
+                        .addToBackStack(PlayerFragment.FRAGMENT_TAG)
+                        .commit();
+            }
+        }
     }
 
     @Override
@@ -32,12 +51,11 @@ public class TrackPlayerActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onTrackSelected(TrackInfo track) {
+    public void onFragmentInteraction(Uri uri) {
 
     }
 }

@@ -19,16 +19,16 @@ public class MainActivity extends AppCompatActivity
 
     private ArtistsFragment artistsFragment;
     private SearchView mSearchView;
-    private boolean mTwoPane;
+    private boolean mLargeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTwoPane = getResources().getBoolean(R.bool.large_layout);
+        mLargeLayout = getResources().getBoolean(R.bool.large_layout);
 
-        if (mTwoPane) {
+        if (mLargeLayout) {
             //tablet view, or smallest width of 600
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onItemSelected(ArtistInfo artist) {
-        if (mTwoPane) {
+        if (mLargeLayout) {
             Bundle args = new Bundle();
             args.putString(MainActivity.ARTIST_INFO, artist.getId());
 

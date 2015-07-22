@@ -57,7 +57,6 @@ public class ArtistTracksFragment extends Fragment {
             }
         });
         mTrackListView.setAdapter(mTrackAdapter);
-
         return rootView;
     }
 
