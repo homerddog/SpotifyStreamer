@@ -1,26 +1,35 @@
 package hong.heeda.hira.spotifystreamer;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.app.DialogFragment;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
  * {@link PlayerFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link PlayerFragment#newInstance} factory method to
+ * Use the {@link PlayerFragment} factory method to
  * create an instance of this fragment.
  */
 public class PlayerFragment extends DialogFragment {
 
-    private OnFragmentInteractionListener mListener;
     public static final String FRAGMENT_TAG = "PFTAG";
+
+    private OnFragmentInteractionListener mListener;
+    private TrackInfo mTrack;
 
     public PlayerFragment() {
         // Required empty public constructor
@@ -29,7 +38,9 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mTrack = arguments.getParcelable("TRACK");
         }
     }
 
@@ -38,6 +49,28 @@ public class PlayerFragment extends DialogFragment {
                              ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_media_player, container, false);
+        TextView artist = (TextView) rootView.findViewById(R.id.artist_text_view);
+        TextView album = (TextView) rootView.findViewById(R.id.album_text_view);
+        TextView track = (TextView) rootView.findViewById(R.id.track_text_view);
+
+        ImageView albumImage = (ImageView) rootView.findViewById(R.id.album_image_view);
+
+        artist.setText(mTrack.getArtist());
+        album.setText(mTrack.getAlbum());
+        track.setText(mTrack.getName());
+
+        DisplayMetrics dm = getActivity().getResources().getDisplayMetrics();
+        int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+
+        albumImage.setImageResource(R.mipmap.ic_launcher);
+
+        if (!TextUtils.isEmpty(mTrack.getImageUrl())) {
+            Picasso.with(getActivity())
+                    .load(mTrack.getImageUrl())
+                    .resize(size, size)
+                    .into(albumImage);
+        }
+
         return rootView;
     }
 
@@ -63,6 +96,11 @@ public class PlayerFragment extends DialogFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
     }
 
     /**
