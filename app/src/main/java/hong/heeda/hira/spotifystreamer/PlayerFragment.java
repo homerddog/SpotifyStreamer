@@ -29,7 +29,12 @@ public class PlayerFragment extends DialogFragment {
     public static final String FRAGMENT_TAG = "PFTAG";
 
     private OnFragmentInteractionListener mListener;
-    private TrackInfo mTrack;
+    private TrackInfo mTrackInfo;
+
+    private TextView mArtist;
+    private TextView mAlbum;
+    private TextView mTrack;
+    private ImageView mAlbumImage;
 
     public PlayerFragment() {
         // Required empty public constructor
@@ -40,7 +45,7 @@ public class PlayerFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
         if (arguments != null) {
-            mTrack = arguments.getParcelable("TRACK");
+            mTrackInfo = arguments.getParcelable(TrackInfo.TRACK_INFO);
         }
     }
 
@@ -49,28 +54,26 @@ public class PlayerFragment extends DialogFragment {
                              ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_media_player, container, false);
-        TextView artist = (TextView) rootView.findViewById(R.id.artist_text_view);
-        TextView album = (TextView) rootView.findViewById(R.id.album_text_view);
-        TextView track = (TextView) rootView.findViewById(R.id.track_text_view);
+        mArtist = (TextView) rootView.findViewById(R.id.artist_text_view);
+        mAlbum = (TextView) rootView.findViewById(R.id.album_text_view);
+        mTrack = (TextView) rootView.findViewById(R.id.track_text_view);
+        mAlbumImage = (ImageView) rootView.findViewById(R.id.album_image_view);
 
-        ImageView albumImage = (ImageView) rootView.findViewById(R.id.album_image_view);
-
-        artist.setText(mTrack.getArtist());
-        album.setText(mTrack.getAlbum());
-        track.setText(mTrack.getName());
+        mArtist.setText(mTrackInfo.getArtist());
+        mAlbum.setText(mTrackInfo.getAlbum());
+        mTrack.setText(mTrackInfo.getName());
 
         DisplayMetrics dm = getActivity().getResources().getDisplayMetrics();
         int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
 
-        albumImage.setImageResource(R.mipmap.ic_launcher);
+        mAlbumImage.setImageResource(R.mipmap.ic_launcher);
 
-        if (!TextUtils.isEmpty(mTrack.getImageUrl())) {
+        if (!TextUtils.isEmpty(mTrackInfo.getImageUrl())) {
             Picasso.with(getActivity())
-                    .load(mTrack.getImageUrl())
+                    .load(mTrackInfo.getImageUrl())
                     .resize(size, size)
-                    .into(albumImage);
+                    .into(mAlbumImage);
         }
-
         return rootView;
     }
 

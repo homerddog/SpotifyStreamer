@@ -67,7 +67,7 @@ public class ArtistTopTracksActivity extends AppCompatActivity
     @Override
     public void onTrackSelected(TrackInfo track) {
         Intent intent = new Intent(this, TrackPlayerActivity.class)
-                .putExtra("Something", track);
+                .putExtra(TrackInfo.TRACK_INFO, track);
         startActivity(intent);
     }
 }

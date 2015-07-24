@@ -20,6 +20,8 @@ public class TrackInfo implements Parcelable {
     private String imageUrl;
     private String previewUrl;
 
+    public final static String TRACK_INFO = "TrackInfo";
+
     public TrackInfo(String name,
                      String artist,
                      String album,

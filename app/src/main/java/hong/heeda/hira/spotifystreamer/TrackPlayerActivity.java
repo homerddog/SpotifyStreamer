@@ -18,7 +18,7 @@ public class TrackPlayerActivity extends AppCompatActivity
         setContentView(R.layout.activity_track_player);
 
         Intent intent = getIntent();
-        TrackInfo track = intent.getParcelableExtra("Something");
+        TrackInfo track = intent.getParcelableExtra(TrackInfo.TRACK_INFO);
 
         mLargeLayout = getResources().getBoolean(R.bool.large_layout);
 
@@ -31,7 +31,7 @@ public class TrackPlayerActivity extends AppCompatActivity
 
                 PlayerFragment fragment = new PlayerFragment();
                 Bundle arguments = new Bundle();
-                arguments.putParcelable("TRACK", track);
+                arguments.putParcelable(TrackInfo.TRACK_INFO, track);
 
                 fragment.setArguments(arguments);
 
