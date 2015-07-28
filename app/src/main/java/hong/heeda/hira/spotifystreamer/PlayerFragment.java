@@ -84,6 +84,7 @@ public class PlayerFragment extends DialogFragment {
         }
     }
 
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -104,6 +105,7 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
+        getActivity().finish();
     }
 
     /**

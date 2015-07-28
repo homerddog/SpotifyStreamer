@@ -35,9 +35,7 @@ public class TrackPlayerActivity extends AppCompatActivity
 
                 fragment.setArguments(arguments);
 
-                transaction.add(android.R.id.content, fragment)
-                        .addToBackStack(PlayerFragment.FRAGMENT_TAG)
-                        .commit();
+                transaction.add(android.R.id.content, fragment).commit();
             }
         }
     }

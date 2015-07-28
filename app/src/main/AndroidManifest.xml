@@ -44,7 +44,7 @@
         </activity>
 
         <service
-            android:name=".service.TrackPlayer"
+            android:name=".service.MusicService"
             android:enabled="true"
             android:exported="true" >
         </service>
