@@ -2,37 +2,82 @@ package hong.heeda.hira.spotifystreamer.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnPreparedListener;
+import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.support.annotation.Nullable;
 
-public class MusicService extends Service implements MediaPlayer.OnPreparedListener {
+import java.util.ArrayList;
 
-    private MediaPlayer mMediaPlayer = null;
+import hong.heeda.hira.spotifystreamer.models.TrackInfo;
 
-    public MusicService() {
-    }
+public class MusicService extends Service implements
+        OnPreparedListener, OnErrorListener, OnCompletionListener {
 
-    @Override
-    public int onStartCommand(Intent intent,
-                              int flags,
-                              int startId) {
+    private static final String TAG = MusicService.class.getSimpleName();
 
-        return super.onStartCommand(intent, flags, startId);
-    }
+    private MediaPlayer mMediaPlayer;
+    private ArrayList<TrackInfo> mPlaylist;
+    private int mSongPosition;
 
+    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return null;
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mp,
+                           int what,
+                           int extra) {
+        return false;
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mSongPosition = 0;
+        mMediaPlayer = new MediaPlayer();
+
+        initializeMediaPlayer();
     }
 
     /**
-     * MediaPlayer.OnPreparedListener implementation.  A Callback to notify
-     * implementing classes that the MediaPlayer is prepared.
-     *
-     * @param mp
+     * Set the current playlist for the MediaPlayer.
+     * @param playlist
      */
-    @Override
-    public void onPrepared(MediaPlayer mp) {
+    public void setPlaylist(ArrayList<TrackInfo> playlist) {
+        mPlaylist = playlist;
+    }
+
+    private void initializeMediaPlayer() {
+        mMediaPlayer.setWakeMode(getApplicationContext(),
+                PowerManager.PARTIAL_WAKE_LOCK);
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+        mMediaPlayer.setOnPreparedListener(this);
+        mMediaPlayer.setOnErrorListener(this);
+        mMediaPlayer.setOnCompletionListener(this);
+    }
+
+    public class MusicBinder extends Binder {
+        MusicService getService() {
+            return MusicService.this;
+        }
     }
 }

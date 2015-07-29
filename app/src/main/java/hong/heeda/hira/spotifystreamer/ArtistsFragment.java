@@ -14,6 +14,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import hong.heeda.hira.spotifystreamer.models.ArtistInfo;
+import hong.heeda.hira.spotifystreamer.utils.NetworkManager;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;

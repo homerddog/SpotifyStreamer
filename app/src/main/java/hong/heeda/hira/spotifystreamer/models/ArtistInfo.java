@@ -1,4 +1,4 @@
-package hong.heeda.hira.spotifystreamer;
+package hong.heeda.hira.spotifystreamer.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

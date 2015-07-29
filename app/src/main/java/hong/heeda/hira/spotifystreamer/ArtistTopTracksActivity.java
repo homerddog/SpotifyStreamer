@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 
+import hong.heeda.hira.spotifystreamer.models.ArtistInfo;
+import hong.heeda.hira.spotifystreamer.models.TrackInfo;
+
 public class ArtistTopTracksActivity extends AppCompatActivity
         implements ArtistTracksFragment.Callback {
 

@@ -14,6 +14,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import hong.heeda.hira.spotifystreamer.models.ArtistInfo;
+
 public class ArtistAdapter extends ArrayAdapter<ArtistInfo> {
 
     private static final String LOG_TAG = ArtistAdapter.class.getSimpleName();

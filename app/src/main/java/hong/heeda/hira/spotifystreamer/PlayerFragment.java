@@ -16,6 +16,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import hong.heeda.hira.spotifystreamer.models.TrackInfo;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the

@@ -1,4 +1,4 @@
-package hong.heeda.hira.spotifystreamer;
+package hong.heeda.hira.spotifystreamer.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

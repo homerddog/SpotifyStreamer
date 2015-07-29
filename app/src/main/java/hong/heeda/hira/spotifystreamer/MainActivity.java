@@ -11,6 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import hong.heeda.hira.spotifystreamer.models.ArtistInfo;
+import hong.heeda.hira.spotifystreamer.utils.NetworkManager;
+
 public class MainActivity extends AppCompatActivity
         implements SearchView.OnQueryTextListener,
         MenuItemCompat.OnActionExpandListener, ArtistsFragment.Callback {

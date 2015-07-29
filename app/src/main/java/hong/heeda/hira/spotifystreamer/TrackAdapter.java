@@ -14,6 +14,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import hong.heeda.hira.spotifystreamer.models.TrackInfo;
+
 public class TrackAdapter extends ArrayAdapter<TrackInfo> {
 
     private static final String LOG_TAG = TrackAdapter.class.getSimpleName();
