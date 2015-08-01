@@ -1,9 +1,14 @@
 package hong.heeda.hira.spotifystreamer;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -16,7 +21,10 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+
 import hong.heeda.hira.spotifystreamer.models.TrackInfo;
+import hong.heeda.hira.spotifystreamer.service.MusicService;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,6 +45,32 @@ public class PlayerFragment extends DialogFragment {
     private TextView mAlbum;
     private TextView mTrack;
     private ImageView mAlbumImage;
+
+
+    private MusicService mMusicService;
+    private boolean mIsMusicBound;
+    private Intent mPlayIntent;
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name,
+                                       IBinder service) {
+            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+            mMusicService = binder.getService();
+
+            ArrayList<TrackInfo> tracks = new ArrayList<>();
+            tracks.add(mTrackInfo);
+
+            mMusicService.setPlaylist(tracks);  //TODO: pass real playlist
+            mIsMusicBound = true;
+            mMusicService.playTrack();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mIsMusicBound = false;
+        }
+    };
 
     public PlayerFragment() {
         // Required empty public constructor
@@ -79,13 +113,11 @@ public class PlayerFragment extends DialogFragment {
         return rootView;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
     }
-
 
     @Override
     public void onAttach(Activity activity) {
@@ -108,6 +140,24 @@ public class PlayerFragment extends DialogFragment {
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
         getActivity().finish();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mPlayIntent == null) {
+            mPlayIntent = new Intent(getActivity(), MusicService.class);
+            getActivity().bindService(mPlayIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+            getActivity().startService(mPlayIntent);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        getActivity().stopService(mPlayIntent);
+        mMusicService = null;
+        getActivity().unbindService(serviceConnection);
+        super.onDestroy();
     }
 
     /**

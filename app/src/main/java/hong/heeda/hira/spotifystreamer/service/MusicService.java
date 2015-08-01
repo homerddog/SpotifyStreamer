@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -23,12 +24,19 @@ public class MusicService extends Service implements
 
     private MediaPlayer mMediaPlayer;
     private ArrayList<TrackInfo> mPlaylist;
-    private int mSongPosition;
+    private int mTrackPosition;
+    private final IBinder mMusicBinder = new MusicBinder();
 
     @Nullable
+    @Override public IBinder onBind(Intent intent) {
+        return mMusicBinder;
+    }
+
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public boolean onUnbind(Intent intent) {
+        mMediaPlayer.stop();
+        mMediaPlayer.release();
+        return false;
     }
 
     @Override
@@ -45,13 +53,14 @@ public class MusicService extends Service implements
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-
+        mp.start();
     }
+
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mSongPosition = 0;
+        mTrackPosition = 0;
         mMediaPlayer = new MediaPlayer();
 
         initializeMediaPlayer();
@@ -65,6 +74,19 @@ public class MusicService extends Service implements
         mPlaylist = playlist;
     }
 
+    public void playTrack() {
+        mMediaPlayer.reset();
+        TrackInfo track = mPlaylist.get(0);
+
+        try {
+            mMediaPlayer.setDataSource(track.getPreviewUrl());
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting data source", e);
+        }
+
+        mMediaPlayer.prepareAsync();
+    }
+
     private void initializeMediaPlayer() {
         mMediaPlayer.setWakeMode(getApplicationContext(),
                 PowerManager.PARTIAL_WAKE_LOCK);
@@ -76,7 +98,7 @@ public class MusicService extends Service implements
     }
 
     public class MusicBinder extends Binder {
-        MusicService getService() {
+        public MusicService getService() {
             return MusicService.this;
         }
     }

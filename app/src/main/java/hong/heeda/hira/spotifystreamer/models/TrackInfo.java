@@ -3,6 +3,8 @@ package hong.heeda.hira.spotifystreamer.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import kaaes.spotify.webapi.android.models.Track;
+
 public class TrackInfo implements Parcelable {
     public static final Parcelable.Creator<TrackInfo> CREATOR = new Parcelable.Creator<TrackInfo>() {
         public TrackInfo createFromParcel(Parcel source) {
@@ -14,32 +16,39 @@ public class TrackInfo implements Parcelable {
         }
     };
 
-    private String name;
-    private String artist;
-    private String album;
-    private String imageUrl;
-    private String previewUrl;
+    private String mName;
+    private String mArtist;
+    private String mAlbum;
+    private String mImageUrl;
+    private String mPreviewUrl;
+    private String mUri;
+    private String mId;
 
     public final static String TRACK_INFO = "TrackInfo";
 
-    public TrackInfo(String name,
-                     String artist,
-                     String album,
-                     String imageUrl,
-                     String previewUrl) {
-        this.name = name;
-        this.artist = artist;
-        this.album = album;
-        this.imageUrl = imageUrl;
-        this.previewUrl = previewUrl;
+    public TrackInfo(Track track) {
+
+        if (track == null) {
+            throw new IllegalArgumentException("track cannot be null");
+        }
+
+        setName(track.name);
+        setArtist(track.artists.get(0).name);
+        setAlbum(track.album.name);
+        setImageUrl(track.album.images.size() > 0 ? track.album.images.get(0).url : "");
+        setPreviewUrl(track.preview_url);
+        setUri(track.uri);
+        setId(track.id);
     }
 
     protected TrackInfo(Parcel in) {
-        this.name = in.readString();
-        this.artist = in.readString();
-        this.album = in.readString();
-        this.imageUrl = in.readString();
-        this.previewUrl = in.readString();
+        mName = in.readString();
+        mArtist = in.readString();
+        mAlbum = in.readString();
+        mImageUrl = in.readString();
+        mPreviewUrl = in.readString();
+        mUri = in.readString();
+        mId = in.readString();
     }
 
     @Override
@@ -50,50 +59,68 @@ public class TrackInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest,
                               int flags) {
-        dest.writeString(this.name);
-        dest.writeString(this.artist);
-        dest.writeString(this.album);
-        dest.writeString(this.imageUrl);
-        dest.writeString(this.previewUrl);
+        dest.writeString(mName);
+        dest.writeString(mArtist);
+        dest.writeString(mAlbum);
+        dest.writeString(mImageUrl);
+        dest.writeString(mPreviewUrl);
+        dest.writeString(mUri);
+        dest.writeString(mId);
     }
 
     public String getName() {
-        return name;
+        return mName;
     }
 
     public void setName(String name) {
-        this.name = name;
+        mName = name;
     }
 
     public String getArtist() {
-        return artist;
+        return mArtist;
     }
 
     public void setArtist(String artist) {
-        this.artist = artist;
+        mArtist = artist;
     }
 
     public String getAlbum() {
-        return album;
+        return mAlbum;
     }
 
     public void setAlbum(String album) {
-        this.album = album;
+        mAlbum = album;
     }
 
     public String getImageUrl() {
-        return imageUrl;
+        return mImageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+        mImageUrl = imageUrl;
     }
 
     public String getPreviewUrl() {
-        return this.previewUrl;
+        return mPreviewUrl;
     }
 
     public void setPreviewUrl(String previewUrl) {
-        this.previewUrl = previewUrl;
+        mPreviewUrl = previewUrl;
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
+    }
+
+    public String getUri() {
+        return mUri;
+    }
+
+    public void setUri(String uri) {
+        mUri = uri;
     }
 }

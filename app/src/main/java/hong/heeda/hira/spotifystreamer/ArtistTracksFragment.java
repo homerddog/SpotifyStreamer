@@ -1,5 +1,6 @@
 package hong.heeda.hira.spotifystreamer;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -53,8 +54,12 @@ public class ArtistTracksFragment extends Fragment {
                                     View view,
                                     int position,
                                     long id) {
-                ((Callback)getActivity())
-                        .onTrackSelected(((TrackInfo)parent.getAdapter().getItem(position)));
+
+                TrackInfo track = ((TrackInfo)parent.getAdapter().getItem(position));
+
+                Intent intent = new Intent(getActivity(), TrackPlayerActivity.class)
+                        .putExtra(TrackInfo.TRACK_INFO, track);
+                startActivity(intent);
             }
         });
         mTrackListView.setAdapter(mTrackAdapter);
@@ -89,10 +94,6 @@ public class ArtistTracksFragment extends Fragment {
         new FetchArtistTracks().execute(artistId);
     }
 
-    public interface Callback {
-        void onTrackSelected(TrackInfo track);
-    }
-
     private void onTaskComplete(List<Track> result) {
         if (result.size() == 0) {
             Toast.makeText(getActivity(),
@@ -103,13 +104,7 @@ public class ArtistTracksFragment extends Fragment {
         mTrackAdapter.clear();
 
         for (Track track : result) {
-            String imageUrl = track.album.images.size() > 0 ? track.album.images.get(0).url : "";
-
-            mTrackAdapter.add(new TrackInfo(track.name,
-                    track.artists.get(0).name,
-                    track.album.name,
-                    imageUrl,
-                    track.preview_url));
+            mTrackAdapter.add(new TrackInfo(track));
         }
     }
 
