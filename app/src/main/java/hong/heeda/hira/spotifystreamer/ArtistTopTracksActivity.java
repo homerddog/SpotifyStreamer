@@ -20,12 +20,14 @@ public class ArtistTopTracksActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             ArtistTracksFragment fragment = new ArtistTracksFragment();
+            Bundle args = new Bundle();
+
+            args.putParcelable(MainActivity.ARTIST_INFO, mArtist);
+            fragment.setArguments(args);
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.frame_layout_main, fragment)
                     .commit();
-
-            fragment.retrieveTracks(mArtist.getId());
         }
         getSupportActionBar().setSubtitle(mArtist.getName());
     }

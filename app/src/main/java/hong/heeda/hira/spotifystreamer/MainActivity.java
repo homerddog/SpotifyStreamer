@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity
 
     private ArtistsFragment artistsFragment;
     private SearchView mSearchView;
-    private boolean mLargeLayout;
+    private static boolean mLargeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity
     public void onItemSelected(ArtistInfo artist) {
         if (mLargeLayout) {
             Bundle args = new Bundle();
-            args.putString(MainActivity.ARTIST_INFO, artist.getId());
+            args.putParcelable(MainActivity.ARTIST_INFO, artist);
 
             ArtistTracksFragment fragment = new ArtistTracksFragment();
             fragment.setArguments(args);
@@ -124,13 +124,21 @@ public class MainActivity extends AppCompatActivity
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_tracks, fragment, ArtistsFragment.ARTISTFRAGMENT_TAG)
                     .commit();
-
-            fragment.retrieveTracks(artist.getId());
         } else {
             Intent intent = new Intent(this, ArtistTopTracksActivity.class)
                     .putExtra(MainActivity.ARTIST_INFO, artist);
 
             startActivity(intent);
         }
+    }
+
+    /**
+     * On large layouts, like Tablets, the view contains multiple fragments.
+     * Allow child fragments to determine the layout size.
+     *
+     * @return true if the layout is large, tablet size
+     */
+    public static boolean isLargeLayout() {
+        return mLargeLayout;
     }
 }

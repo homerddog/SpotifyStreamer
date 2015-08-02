@@ -13,8 +13,7 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.util.ArrayList;
-
+import hong.heeda.hira.spotifystreamer.models.Playlist;
 import hong.heeda.hira.spotifystreamer.models.TrackInfo;
 
 public class MusicService extends Service implements
@@ -23,7 +22,7 @@ public class MusicService extends Service implements
     private static final String TAG = MusicService.class.getSimpleName();
 
     private MediaPlayer mMediaPlayer;
-    private ArrayList<TrackInfo> mPlaylist;
+    private Playlist mPlaylist;
     private int mTrackPosition;
     private final IBinder mMusicBinder = new MusicBinder();
 
@@ -70,13 +69,13 @@ public class MusicService extends Service implements
      * Set the current playlist for the MediaPlayer.
      * @param playlist
      */
-    public void setPlaylist(ArrayList<TrackInfo> playlist) {
+    public void setPlaylist(Playlist playlist) {
         mPlaylist = playlist;
     }
 
     public void playTrack() {
         mMediaPlayer.reset();
-        TrackInfo track = mPlaylist.get(0);
+        TrackInfo track = mPlaylist.getTracks().get(mPlaylist.getPosition());
 
         try {
             mMediaPlayer.setDataSource(track.getPreviewUrl());

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,13 +19,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hong.heeda.hira.spotifystreamer.models.ArtistInfo;
+import hong.heeda.hira.spotifystreamer.models.Playlist;
 import hong.heeda.hira.spotifystreamer.models.TrackInfo;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import retrofit.RetrofitError;
 
-public class ArtistTracksFragment extends Fragment {
+public class ArtistTracksFragment extends Fragment implements AdapterView.OnItemClickListener {
 
     public static final String TRACKSFRAGMENT_TAG = "ATTAG";
     private static final String LOG_TAG = ArtistTracksFragment.class.getSimpleName();
@@ -33,6 +36,7 @@ public class ArtistTracksFragment extends Fragment {
     private ArrayAdapter<TrackInfo> mTrackAdapter;
     private ListView mTrackListView;
     private ArrayList<TrackInfo> mTracks;
+    private ArtistInfo mArtistInfo;
 
     public ArtistTracksFragment() {
     }
@@ -40,6 +44,10 @@ public class ArtistTracksFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle args = getArguments();
+        if (args != null) {
+            mArtistInfo = args.getParcelable(MainActivity.ARTIST_INFO);
+        }
     }
 
     @Override
@@ -48,20 +56,7 @@ public class ArtistTracksFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
         mTrackListView = (ListView) rootView.findViewById(R.id.list_view);
-        mTrackListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent,
-                                    View view,
-                                    int position,
-                                    long id) {
-
-                TrackInfo track = ((TrackInfo)parent.getAdapter().getItem(position));
-
-                Intent intent = new Intent(getActivity(), TrackPlayerActivity.class)
-                        .putExtra(TrackInfo.TRACK_INFO, track);
-                startActivity(intent);
-            }
-        });
+        mTrackListView.setOnItemClickListener(this);
         mTrackListView.setAdapter(mTrackAdapter);
         return rootView;
     }
@@ -74,6 +69,10 @@ public class ArtistTracksFragment extends Fragment {
             mTracks = (ArrayList<TrackInfo>) savedInstanceState.get(TRACK_LIST);
         } else {
             mTracks = new ArrayList<>();
+
+            if (mArtistInfo != null) {
+                retrieveTracks(mArtistInfo.getId());
+            }
         }
         mTrackAdapter = new TrackAdapter(
                 getActivity(),
@@ -105,6 +104,30 @@ public class ArtistTracksFragment extends Fragment {
 
         for (Track track : result) {
             mTrackAdapter.add(new TrackInfo(track));
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent,
+                            View view,
+                            int position,
+                            long id) {
+        Playlist playlist = new Playlist(mArtistInfo, mTracks, position);
+
+        if (MainActivity.isLargeLayout()) {
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+
+            PlayerFragment fragment = new PlayerFragment();
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(Playlist.PLAYLIST, playlist);
+
+            fragment.setArguments(arguments);
+            fragment.show(fragmentManager, "PlayerFragment");
+
+        } else {
+            Intent intent = new Intent(getActivity(), NowPlayingActivity.class)
+                    .putExtra(Playlist.PLAYLIST, playlist);
+            startActivity(intent);
         }
     }
 
