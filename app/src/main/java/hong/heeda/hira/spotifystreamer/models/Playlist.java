@@ -62,7 +62,11 @@ public class Playlist implements Parcelable {
         }
     };
 
-    public int getPosition() {
+    public int getCurrentTrackPosition() {
         return mCurrentTrackPosition;
+    }
+
+    public void setCurrentTrackPosition(int position) {
+        mCurrentTrackPosition = position;
     }
 }

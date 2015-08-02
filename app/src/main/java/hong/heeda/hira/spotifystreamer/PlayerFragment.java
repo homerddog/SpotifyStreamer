@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Drawable;
+import android.media.MediaMetadata;
+import android.media.session.MediaController;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
@@ -30,12 +34,28 @@ public class PlayerFragment extends DialogFragment {
     private TextView mArtist;
     private TextView mAlbum;
     private TextView mTrack;
+    private Drawable mPauseDrawable;
+    private Drawable mPlayDrawable;
     private ImageView mAlbumImage;
-
+    private ImageView mSkipNext;
+    private ImageView mSkipPrev;
+    private ImageView mPlayPause;
 
     private MusicService mMusicService;
     private boolean mIsMusicBound;
     private Intent mPlayIntent;
+
+    private MediaController.Callback mCallback = new MediaController.Callback() {
+        @Override
+        public void onPlaybackStateChanged(PlaybackState state) {
+            super.onPlaybackStateChanged(state);
+        }
+
+        @Override
+        public void onMetadataChanged(MediaMetadata metadata) {
+            super.onMetadataChanged(metadata);
+        }
+    };
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -71,10 +91,22 @@ public class PlayerFragment extends DialogFragment {
                              ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_media_player, container, false);
+        mPauseDrawable = getActivity().getDrawable(android.R.drawable.ic_media_pause);
+        mPlayDrawable = getActivity().getDrawable(android.R.drawable.ic_media_play);
         mArtist = (TextView) rootView.findViewById(R.id.artist_text_view);
         mAlbum = (TextView) rootView.findViewById(R.id.album_text_view);
         mTrack = (TextView) rootView.findViewById(R.id.track_text_view);
         mAlbumImage = (ImageView) rootView.findViewById(R.id.album_image_view);
+        mSkipNext = (ImageView) rootView.findViewById(R.id.next_image_button);
+        mSkipPrev = (ImageView) rootView.findViewById(R.id.previous_image_button);
+        mPlayPause = (ImageView) rootView.findViewById(R.id.play_image_button);
+
+        mSkipNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMusicService.skipToNext();
+            }
+        });
 
         TrackInfo trackInfo = mPlaylist.getTrack();
 
@@ -104,15 +136,19 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        if (!MainActivity.isLargeLayout()) {
-            getActivity().finish();
-        }
+//        if (!MainActivity.isLargeLayout()) {
+//            getActivity().finish();
+//        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
         if (mPlayIntent == null) {
+            MediaController controller = getActivity().getMediaController();
+            if (controller != null) {
+                controller.registerCallback(mCallback);
+            }
             mPlayIntent = new Intent(getActivity(), MusicService.class);
             getActivity().bindService(mPlayIntent, serviceConnection, Context.BIND_AUTO_CREATE);
             getActivity().startService(mPlayIntent);
@@ -126,4 +162,6 @@ public class PlayerFragment extends DialogFragment {
         getActivity().unbindService(serviceConnection);
         super.onDestroy();
     }
+
+
 }

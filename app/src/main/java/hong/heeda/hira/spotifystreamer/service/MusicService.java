@@ -26,6 +26,14 @@ public class MusicService extends Service implements
     private int mTrackPosition;
     private final IBinder mMusicBinder = new MusicBinder();
 
+    @Override
+    public int onStartCommand(Intent intent,
+                              int flags,
+                              int startId) {
+
+        return START_STICKY;
+    }
+
     @Nullable
     @Override public IBinder onBind(Intent intent) {
         return mMusicBinder;
@@ -75,15 +83,44 @@ public class MusicService extends Service implements
 
     public void playTrack() {
         mMediaPlayer.reset();
-        TrackInfo track = mPlaylist.getTracks().get(mPlaylist.getPosition());
+        TrackInfo track = mPlaylist.getTracks().get(mPlaylist.getCurrentTrackPosition());
 
         try {
             mMediaPlayer.setDataSource(track.getPreviewUrl());
+            mMediaPlayer.prepareAsync();
         } catch (Exception e) {
             Log.e(TAG, "Error setting data source", e);
         }
+    }
 
-        mMediaPlayer.prepareAsync();
+    public void skipToNext() {
+        if (mMediaPlayer != null) {
+            try {
+                mPlaylist.setCurrentTrackPosition(mPlaylist.getCurrentTrackPosition() + 1);
+                mMediaPlayer.reset();
+                mMediaPlayer.setDataSource(mPlaylist.getTrack().getPreviewUrl());
+                mMediaPlayer.prepareAsync();
+            } catch (Exception e) {
+
+            }
+        }
+    }
+
+    public class MusicBinder extends Binder {
+        public MusicService getService() {
+            return MusicService.this;
+        }
+    }
+
+    public interface PlaybackListener {
+        void onPlay(TrackInfo track);
+        void onStop();
+        void onSkipNext(TrackInfo track);
+        void onSkipPrevious(TrackInfo track);
+    }
+
+    private boolean isInSafeState() {
+        return false;
     }
 
     private void initializeMediaPlayer() {
@@ -94,11 +131,5 @@ public class MusicService extends Service implements
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnCompletionListener(this);
-    }
-
-    public class MusicBinder extends Binder {
-        public MusicService getService() {
-            return MusicService.this;
-        }
     }
 }
