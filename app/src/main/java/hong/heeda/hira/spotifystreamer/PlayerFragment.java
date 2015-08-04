@@ -141,7 +141,6 @@ public class PlayerFragment extends DialogFragment {
         mArtist.setText(mPlaylist.getArtist().getName());
         mAlbum.setText(trackInfo.getAlbum());
         mTrack.setText(trackInfo.getName());
-        mSeekBar.setMax(30000);
 
         DisplayMetrics dm = getActivity().getResources().getDisplayMetrics();
         int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
@@ -204,10 +203,6 @@ public class PlayerFragment extends DialogFragment {
 
         if (mPlayIntent == null) {
             Activity activity = getActivity();
-            MediaController controller = activity.getMediaController();
-            if (controller != null) {
-                controller.registerCallback(mCallback);
-            }
             mPlayIntent = new Intent(activity, MusicService.class);
             activity.startService(mPlayIntent);
             activity.bindService(mPlayIntent, serviceConnection, Context.BIND_AUTO_CREATE);

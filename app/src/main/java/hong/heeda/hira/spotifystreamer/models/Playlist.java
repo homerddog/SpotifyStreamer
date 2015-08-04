@@ -12,6 +12,7 @@ public class Playlist implements Parcelable {
     private ArtistInfo mArtist;
     private ArrayList<TrackInfo> mTracks;
     private int mCurrentTrackPosition;
+    private int mCurrentPositionInTrack;
 
     public static final String PLAYLIST = "Playlist";
 
@@ -29,9 +30,10 @@ public class Playlist implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest,
                               int flags) {
-        dest.writeParcelable(this.mArtist, 0);
+        dest.writeParcelable(mArtist, 0);
         dest.writeTypedList(mTracks);
-        dest.writeInt(this.mCurrentTrackPosition);
+        dest.writeInt(mCurrentTrackPosition);
+        dest.writeInt(mCurrentPositionInTrack);
     }
 
     public ArrayList<TrackInfo> getTracks() {
@@ -47,9 +49,10 @@ public class Playlist implements Parcelable {
     }
 
     protected Playlist(Parcel in) {
-        this.mArtist = in.readParcelable(ArtistInfo.class.getClassLoader());
-        this.mTracks = in.createTypedArrayList(TrackInfo.CREATOR);
-        this.mCurrentTrackPosition = in.readInt();
+        mArtist = in.readParcelable(ArtistInfo.class.getClassLoader());
+        mTracks = in.createTypedArrayList(TrackInfo.CREATOR);
+        mCurrentTrackPosition = in.readInt();
+        mCurrentPositionInTrack = in.readInt();
     }
 
     public static final Parcelable.Creator<Playlist> CREATOR = new Parcelable.Creator<Playlist>() {
@@ -67,6 +70,14 @@ public class Playlist implements Parcelable {
     }
 
     public void setCurrentTrackPosition(int position) {
+        mCurrentTrackPosition = position;
+    }
+
+    public int getCurrentPositionInTrack() {
+        return mCurrentPositionInTrack;
+    }
+
+    public void setCurrentPositionInTrack(int position) {
         mCurrentTrackPosition = position;
     }
 }

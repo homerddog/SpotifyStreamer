@@ -35,13 +35,12 @@ public class MusicService extends Service implements
     private int mTrackPosition;
     private final IBinder mMusicBinder = new MusicBinder();
 
-    private Handler mHandler = new Handler();
+    private Handler mRunnableHandler = new Handler();
     private Runnable mProgressUpdate = new Runnable() {
         @Override
         public void run() {
             BusProvider.getInstance().post(publishProgressChange());
-
-            mHandler.postDelayed(this, 1000);
+            mRunnableHandler.postDelayed(this, 1000);
         }
     };
 
@@ -49,7 +48,6 @@ public class MusicService extends Service implements
     public int onStartCommand(Intent intent,
                               int flags,
                               int startId) {
-
         return START_STICKY;
     }
 
@@ -60,13 +58,16 @@ public class MusicService extends Service implements
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        mRunnableHandler.removeCallbacks(mProgressUpdate);
+        stopForeground(true);
+        stopSelf();
     }
 
     @Override
     public boolean onError(MediaPlayer mp,
                            int what,
                            int extra) {
+        Log.i("MusicService", String.valueOf(what));
         return false;
     }
 
@@ -91,11 +92,11 @@ public class MusicService extends Service implements
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setTicker(trackInfo.getName())
                 .setOngoing(true)
-                .setContentTitle(trackInfo.getArtist() + " " + trackInfo.getAlbum())
+                .setContentTitle(trackInfo.getArtist())
         .setContentText(trackInfo.getName());
-        Notification not = builder.build();
+        Notification notification = builder.build();
 
-        startForeground(NOTIFICATION_ID, not);
+        startForeground(NOTIFICATION_ID, notification);
     }
 
     @Override
