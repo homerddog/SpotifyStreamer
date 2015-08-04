@@ -1,8 +1,8 @@
 package hong.heeda.hira.spotifystreamer;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
@@ -18,13 +18,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
+import hong.heeda.hira.spotifystreamer.events.ProgressChangedEvent;
 import hong.heeda.hira.spotifystreamer.models.Playlist;
 import hong.heeda.hira.spotifystreamer.models.TrackInfo;
 import hong.heeda.hira.spotifystreamer.service.MusicService;
+import hong.heeda.hira.spotifystreamer.utils.BusProvider;
 
 public class PlayerFragment extends DialogFragment {
 
@@ -40,6 +44,9 @@ public class PlayerFragment extends DialogFragment {
     private ImageView mSkipNext;
     private ImageView mSkipPrev;
     private ImageView mPlayPause;
+    private SeekBar mSeekBar;
+    private TextView mCurrentPosition;
+    private TextView mTrackLength;
 
     private MusicService mMusicService;
     private boolean mIsMusicBound;
@@ -75,15 +82,7 @@ public class PlayerFragment extends DialogFragment {
         }
     };
 
-    public PlayerFragment() { }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            mPlaylist = arguments.getParcelable(Playlist.PLAYLIST);
-        }
+    public PlayerFragment() {
     }
 
     @Override
@@ -100,6 +99,31 @@ public class PlayerFragment extends DialogFragment {
         mSkipNext = (ImageView) rootView.findViewById(R.id.next_image_button);
         mSkipPrev = (ImageView) rootView.findViewById(R.id.previous_image_button);
         mPlayPause = (ImageView) rootView.findViewById(R.id.play_image_button);
+        mSeekBar = (SeekBar) rootView.findViewById(R.id.track_seekbar);
+        mTrackLength = (TextView) rootView.findViewById(R.id.text_track_length);
+        mCurrentPosition = (TextView) rootView.findViewById(R.id.text_current_position);
+
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            private boolean mFromUser = false;
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar,
+                                          int progress,
+                                          boolean fromUser) {
+                mFromUser = fromUser;
+                seekTo(progress, mFromUser);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                mFromUser = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mFromUser = false;
+            }
+        });
 
         mSkipNext.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,11 +132,16 @@ public class PlayerFragment extends DialogFragment {
             }
         });
 
+        if (savedInstanceState != null && savedInstanceState.containsKey(Playlist.PLAYLIST)) {
+            mPlaylist = savedInstanceState.getParcelable(Playlist.PLAYLIST);
+        }
+
         TrackInfo trackInfo = mPlaylist.getTrack();
 
         mArtist.setText(mPlaylist.getArtist().getName());
         mAlbum.setText(trackInfo.getAlbum());
         mTrack.setText(trackInfo.getName());
+        mSeekBar.setMax(30000);
 
         DisplayMetrics dm = getActivity().getResources().getDisplayMetrics();
         int size = Math.round(86 * (dm.xdpi / DisplayMetrics.DENSITY_DEFAULT));
@@ -129,39 +158,71 @@ public class PlayerFragment extends DialogFragment {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mPlaylist = arguments.getParcelable(Playlist.PLAYLIST);
+        }
+    }
+
+//    @Override
+//    public void onDestroy() {
+//        getActivity().stopService(mPlayIntent);
+//        mMusicService = null;
+//        getActivity().unbindService(serviceConnection);
+//        super.onDestroy();
+//    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        BusProvider.getInstance().register(this);
+        getActivity().bindService(mPlayIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-//        if (!MainActivity.isLargeLayout()) {
-//            getActivity().finish();
-//        }
+    public void onPause() {
+        super.onPause();
+        BusProvider.getInstance().unregister(this);
+        getActivity().unbindService(serviceConnection);
+    }
+
+    @Subscribe
+    public void updateSeekBar(ProgressChangedEvent event) {
+        if (event == null) {
+            throw new IllegalArgumentException("event cannot be null");
+        }
+
+        mSeekBar.setProgress(event.getPosition());
+        mCurrentPosition.setText(event.toString());
     }
 
     @Override
     public void onStart() {
         super.onStart();
+
         if (mPlayIntent == null) {
-            MediaController controller = getActivity().getMediaController();
+            Activity activity = getActivity();
+            MediaController controller = activity.getMediaController();
             if (controller != null) {
                 controller.registerCallback(mCallback);
             }
-            mPlayIntent = new Intent(getActivity(), MusicService.class);
-            getActivity().bindService(mPlayIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-            getActivity().startService(mPlayIntent);
+            mPlayIntent = new Intent(activity, MusicService.class);
+            activity.startService(mPlayIntent);
+            activity.bindService(mPlayIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
     @Override
-    public void onDestroy() {
-        getActivity().stopService(mPlayIntent);
-        mMusicService = null;
-        getActivity().unbindService(serviceConnection);
-        super.onDestroy();
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(Playlist.PLAYLIST, mPlaylist);
     }
 
-
+    private void seekTo(int position, boolean fromUser) {
+        if (mMusicService != null && fromUser) {
+            mMusicService.seekTo(position);
+        }
+    }
 }
