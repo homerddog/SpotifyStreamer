@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -49,6 +50,7 @@ public class PlayerFragment extends DialogFragment {
     private TextView mTrackLength;
 
     private MusicService mMusicService;
+    private MediaSession mSession;
     private boolean mIsMusicBound;
     private Intent mPlayIntent;
 
@@ -70,10 +72,13 @@ public class PlayerFragment extends DialogFragment {
                                        IBinder service) {
             MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
             mMusicService = binder.getService();
+            mSession = mMusicService.getSession();
 
             mMusicService.setPlaylist(mPlaylist);
             mIsMusicBound = true;
-            mMusicService.playTrack();
+
+            //when the service is connected, begin playback?
+            mSession.getController().getTransportControls().play();
         }
 
         @Override
@@ -111,7 +116,6 @@ public class PlayerFragment extends DialogFragment {
                                           int progress,
                                           boolean fromUser) {
                 mFromUser = fromUser;
-                seekTo(progress, mFromUser);
             }
 
             @Override
@@ -128,7 +132,18 @@ public class PlayerFragment extends DialogFragment {
         mSkipNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mMusicService.skipToNext();
+            }
+        });
+
+        mPlayPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MediaController.TransportControls controls =
+                        mSession.getController().getTransportControls();
+
+                if (controls != null) {
+                    controls.play();
+                }
             }
         });
 
@@ -157,12 +172,10 @@ public class PlayerFragment extends DialogFragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            mPlaylist = arguments.getParcelable(Playlist.PLAYLIST);
-        }
+    public void onResume() {
+        super.onResume();
+        BusProvider.getInstance().register(this);
+        getActivity().bindService(mPlayIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
 //    @Override
@@ -174,27 +187,19 @@ public class PlayerFragment extends DialogFragment {
 //    }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        BusProvider.getInstance().register(this);
-        getActivity().bindService(mPlayIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         BusProvider.getInstance().unregister(this);
         getActivity().unbindService(serviceConnection);
     }
 
-    @Subscribe
-    public void updateSeekBar(ProgressChangedEvent event) {
-        if (event == null) {
-            throw new IllegalArgumentException("event cannot be null");
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mPlaylist = arguments.getParcelable(Playlist.PLAYLIST);
         }
-
-        mSeekBar.setProgress(event.getPosition());
-        mCurrentPosition.setText(event.toString());
     }
 
     @Override
@@ -215,9 +220,13 @@ public class PlayerFragment extends DialogFragment {
         outState.putParcelable(Playlist.PLAYLIST, mPlaylist);
     }
 
-    private void seekTo(int position, boolean fromUser) {
-        if (mMusicService != null && fromUser) {
-            mMusicService.seekTo(position);
+    @Subscribe
+    public void updateSeekBar(ProgressChangedEvent event) {
+        if (event == null) {
+            throw new IllegalArgumentException("event cannot be null");
         }
+
+        mSeekBar.setProgress(event.getPosition());
+        mCurrentPosition.setText(event.toString());
     }
 }
