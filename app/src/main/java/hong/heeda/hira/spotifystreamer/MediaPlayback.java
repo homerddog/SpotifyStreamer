@@ -32,7 +32,14 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
 
     @Override
     public void stop(boolean notifyListeners) {
+        mState = PlaybackState.STATE_STOPPED;
+        if (notifyListeners && mCallback != null) {
+            mCallback.onPlaybackStatusChanged(mState);
+        }
 
+        mMediaPlayer.reset();
+        mMediaPlayer.release();
+        mMediaPlayer = null;
     }
 
     @Override
@@ -52,9 +59,8 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
 
     @Override
     public void play(TrackInfo track) {
-
         try {
-            createMediaPlayerIfNeeded();
+            initializeMediaPlayer();
 
             mState = PlaybackState.STATE_BUFFERING;
 
@@ -62,7 +68,7 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
             mMediaPlayer.setDataSource(track.getPreviewUrl());
             mMediaPlayer.prepareAsync();
 
-            //notify listeners
+            //notify listener
             if (mCallback != null) {
                 mCallback.onPlaybackStatusChanged(mState);
             }
@@ -93,7 +99,10 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
     public boolean onError(MediaPlayer mp,
                            int what,
                            int extra) {
-        return false;
+        if (mCallback != null) {
+            mCallback.onError("MediaPlayer Error" + what + "(" + extra + ")");
+        }
+        return true;
     }
 
     @Override
@@ -103,10 +112,10 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
 
     @Override
     public void onSeekComplete(MediaPlayer mp) {
-
+        // TODO: implement in the case of continuous top ten tracks playback
     }
 
-    private void createMediaPlayerIfNeeded() {
+    private void initializeMediaPlayer() {
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
 

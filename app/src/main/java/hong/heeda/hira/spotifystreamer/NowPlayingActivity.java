@@ -2,11 +2,10 @@ package hong.heeda.hira.spotifystreamer;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 
 import hong.heeda.hira.spotifystreamer.models.Playlist;
 
-public class NowPlayingActivity extends AppCompatActivity {
+public class NowPlayingActivity extends BaseActivity {
 
     private final String LOG_TAG = NowPlayingActivity.class.getSimpleName();
 

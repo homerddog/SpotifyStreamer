@@ -10,12 +10,12 @@ import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 
 import hong.heeda.hira.spotifystreamer.MediaPlayback;
+import hong.heeda.hira.spotifystreamer.Playback;
 import hong.heeda.hira.spotifystreamer.models.Playlist;
 
 public class MusicService extends Service {
 
     private static final String TAG = MusicService.class.getSimpleName();
-    private static final int NOTIFICATION_ID = 1;
 
     private MediaPlayback mMediaPlayback;
 
@@ -42,8 +42,10 @@ public class MusicService extends Service {
         mSession = new MediaSession(getApplicationContext(), "MusicService");
         mSession.setCallback(new MediaSessionCallback());
         mSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mSession.setActive(true);
 
         mMediaPlayback = new MediaPlayback(this);
+        mMediaPlayback.setCallback(mCallback);
         mMediaPlayback.start();
     }
 
@@ -104,12 +106,12 @@ public class MusicService extends Service {
 
         @Override
         public void onPause() {
-            super.onPause();
+            mMediaPlayback.pause();
         }
 
         @Override
         public void onSkipToNext() {
-            super.onSkipToNext();
+            mMediaPlayback.skipToNext();
         }
 
         @Override
@@ -119,7 +121,7 @@ public class MusicService extends Service {
 
         @Override
         public void onStop() {
-            super.onStop();
+            mMediaPlayback.stop(true);
         }
 
         @Override
@@ -127,4 +129,26 @@ public class MusicService extends Service {
             super.onSeekTo(pos);
         }
     }
+
+    private final Playback.Callback mCallback = new Playback.Callback() {
+        @Override
+        public void onCompletion() {
+
+        }
+
+        @Override
+        public void onPlaybackStatusChanged(int state) {
+
+        }
+
+        @Override
+        public void onError(String error) {
+
+        }
+
+        @Override
+        public void onMetadataChanged(String mediaId) {
+
+        }
+    };
 }

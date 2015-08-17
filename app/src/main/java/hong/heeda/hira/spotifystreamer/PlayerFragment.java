@@ -15,6 +15,7 @@ import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,18 +23,16 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
-import hong.heeda.hira.spotifystreamer.events.ProgressChangedEvent;
 import hong.heeda.hira.spotifystreamer.models.Playlist;
 import hong.heeda.hira.spotifystreamer.models.TrackInfo;
 import hong.heeda.hira.spotifystreamer.service.MusicService;
-import hong.heeda.hira.spotifystreamer.utils.BusProvider;
 
 public class PlayerFragment extends DialogFragment {
 
     public static final String FRAGMENT_TAG = "PFTAG";
+    private static final String TAG = PlayerFragment.class.getSimpleName();
 
     private Playlist mPlaylist;
     private TextView mArtist;
@@ -58,6 +57,7 @@ public class PlayerFragment extends DialogFragment {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             super.onPlaybackStateChanged(state);
+            Log.i(TAG, "PlaybackState changed " + state);
         }
 
         @Override
@@ -72,13 +72,17 @@ public class PlayerFragment extends DialogFragment {
                                        IBinder service) {
             MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
             mMusicService = binder.getService();
-            mSession = mMusicService.getSession();
 
-            mMusicService.setPlaylist(mPlaylist);
-            mIsMusicBound = true;
+            if (mSession != null && !mSession.isActive()) {
 
-            //when the service is connected, begin playback?
-            mSession.getController().getTransportControls().play();
+            } else {
+                mSession = mMusicService.getSession();
+                mMusicService.setPlaylist(mPlaylist);
+                mIsMusicBound = true;
+
+                //when the service is connected, begin playback?
+                mSession.getController().getTransportControls().play();
+            }
         }
 
         @Override
@@ -162,6 +166,7 @@ public class PlayerFragment extends DialogFragment {
 
         mAlbumImage.setImageResource(R.mipmap.ic_launcher);
 
+        // TODO: load image in background
         if (!TextUtils.isEmpty(trackInfo.getImageUrl())) {
             Picasso.with(getActivity())
                     .load(trackInfo.getImageUrl())
@@ -174,27 +179,18 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        BusProvider.getInstance().register(this);
         getActivity().bindService(mPlayIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
-
-//    @Override
-//    public void onDestroy() {
-//        getActivity().stopService(mPlayIntent);
-//        mMusicService = null;
-//        getActivity().unbindService(serviceConnection);
-//        super.onDestroy();
-//    }
 
     @Override
     public void onPause() {
         super.onPause();
-        BusProvider.getInstance().unregister(this);
         getActivity().unbindService(serviceConnection);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "onCreate PlayerFragment");
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
         if (arguments != null) {
@@ -205,7 +201,6 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-
         if (mPlayIntent == null) {
             Activity activity = getActivity();
             mPlayIntent = new Intent(activity, MusicService.class);
@@ -218,15 +213,5 @@ public class PlayerFragment extends DialogFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(Playlist.PLAYLIST, mPlaylist);
-    }
-
-    @Subscribe
-    public void updateSeekBar(ProgressChangedEvent event) {
-        if (event == null) {
-            throw new IllegalArgumentException("event cannot be null");
-        }
-
-        mSeekBar.setProgress(event.getPosition());
-        mCurrentPosition.setText(event.toString());
     }
 }

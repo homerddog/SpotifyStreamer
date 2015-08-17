@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,7 +13,7 @@ import android.widget.Toast;
 import hong.heeda.hira.spotifystreamer.models.ArtistInfo;
 import hong.heeda.hira.spotifystreamer.utils.NetworkManager;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements SearchView.OnQueryTextListener,
         MenuItemCompat.OnActionExpandListener, ArtistsFragment.Callback {
 
@@ -22,16 +21,13 @@ public class MainActivity extends AppCompatActivity
 
     private ArtistsFragment artistsFragment;
     private SearchView mSearchView;
-    private static boolean mLargeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLargeLayout = getResources().getBoolean(R.bool.large_layout);
-
-        if (mLargeLayout) {
+        if (isLargeLayout()) {
             //tablet view, or smallest width of 600
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
@@ -114,7 +110,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onItemSelected(ArtistInfo artist) {
-        if (mLargeLayout) {
+        if (isLargeLayout()) {
             Bundle args = new Bundle();
             args.putParcelable(MainActivity.ARTIST_INFO, artist);
 
@@ -130,15 +126,5 @@ public class MainActivity extends AppCompatActivity
 
             startActivity(intent);
         }
-    }
-
-    /**
-     * On large layouts, like Tablets, the view contains multiple fragments.
-     * Allow child fragments to determine the layout size.
-     *
-     * @return true if the layout is large, tablet size
-     */
-    public static boolean isLargeLayout() {
-        return mLargeLayout;
     }
 }
