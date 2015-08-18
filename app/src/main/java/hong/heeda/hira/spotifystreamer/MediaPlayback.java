@@ -48,16 +48,6 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
     }
 
     @Override
-    public void skipToNext() {
-
-    }
-
-    @Override
-    public void skipToPrev() {
-
-    }
-
-    @Override
     public void play(TrackInfo track) {
         try {
             initializeMediaPlayer();
@@ -80,7 +70,12 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
 
     @Override
     public boolean isPlaying() {
-        return false;
+        return true;
+    }
+
+    @Override
+    public int getState() {
+        return mState;
     }
 
     @Override
@@ -90,6 +85,7 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
 
     @Override
     public void onCompletion(MediaPlayer mp) {
+        mState = PlaybackState.STATE_STOPPED;
         if (mCallback != null) {
             mCallback.onCompletion();
         }
@@ -108,6 +104,7 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+        mState = PlaybackState.STATE_PLAYING;
     }
 
     @Override

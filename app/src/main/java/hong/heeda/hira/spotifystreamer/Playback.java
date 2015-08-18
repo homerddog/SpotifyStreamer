@@ -12,13 +12,11 @@ public interface Playback {
 
     void pause();
 
-    void skipToNext();
-
-    void skipToPrev();
-
     void play(TrackInfo track);
 
     boolean isPlaying();
+
+    int getState();
 
     interface Callback {
         /**

@@ -11,7 +11,9 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.v4.app.DialogFragment;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -24,6 +26,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import hong.heeda.hira.spotifystreamer.models.Playlist;
 import hong.heeda.hira.spotifystreamer.models.TrackInfo;
@@ -48,16 +55,33 @@ public class PlayerFragment extends DialogFragment {
     private TextView mCurrentPosition;
     private TextView mTrackLength;
 
+    private static final long PROGRESS_UPDATE_INTERNAL = 1000;
+    private static final long PROGRESS_UPDATE_INITIAL_INTERVAL = 100;
+
+    private final ScheduledExecutorService mExecutorService =
+            Executors.newSingleThreadScheduledExecutor();
+
+    private ScheduledFuture<?> mScheduleFuture;
+    private final Handler mHandler = new Handler();
+
     private MusicService mMusicService;
     private MediaSession mSession;
     private boolean mIsMusicBound;
     private Intent mPlayIntent;
+    private PlaybackState mLastPlaybackState;
+
+    private Runnable mUpdateProgressTask = new Runnable() {
+        @Override
+        public void run() {
+            updateProgress();
+        }
+    };
 
     private MediaController.Callback mCallback = new MediaController.Callback() {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
-            super.onPlaybackStateChanged(state);
             Log.i(TAG, "PlaybackState changed " + state);
+            updateViews(state);
         }
 
         @Override
@@ -80,8 +104,10 @@ public class PlayerFragment extends DialogFragment {
                 mMusicService.setPlaylist(mPlaylist);
                 mIsMusicBound = true;
 
+                connectToSession(mSession.getSessionToken());
                 //when the service is connected, begin playback?
-                mSession.getController().getTransportControls().play();
+                getActivity().getMediaController().getTransportControls().play();
+                startSeekbarUpdate();
             }
         }
 
@@ -119,6 +145,7 @@ public class PlayerFragment extends DialogFragment {
             public void onProgressChanged(SeekBar seekBar,
                                           int progress,
                                           boolean fromUser) {
+                mCurrentPosition.setText(String.valueOf(progress));
                 mFromUser = fromUser;
             }
 
@@ -136,17 +163,32 @@ public class PlayerFragment extends DialogFragment {
         mSkipNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MediaController.TransportControls controls =
+                        getActivity().getMediaController().getTransportControls();
+
+                controls.skipToNext();
             }
         });
 
         mPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MediaController.TransportControls controls =
-                        mSession.getController().getTransportControls();
+                MediaController mediaController = getActivity().getMediaController();
+                PlaybackState state = mediaController.getPlaybackState();
 
-                if (controls != null) {
-                    controls.play();
+                if (state != null) {
+                    MediaController.TransportControls controls =
+                            mediaController.getTransportControls();
+
+                    switch (state.getState()) {
+                        case PlaybackState.STATE_PAUSED:
+                        case PlaybackState.STATE_STOPPED:
+                            if (controls != null) {
+                                controls.play();
+                            }
+                            startSeekbarUpdate();
+                            break;
+                    }
                 }
             }
         });
@@ -210,8 +252,79 @@ public class PlayerFragment extends DialogFragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if (getActivity().getMediaController() != null) {
+            getActivity().getMediaController().unregisterCallback(mCallback);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(Playlist.PLAYLIST, mPlaylist);
+    }
+
+    private void startSeekbarUpdate() {
+        stopSeekbarUpdate();
+        if (!mExecutorService.isShutdown()) {
+            mScheduleFuture = mExecutorService.scheduleAtFixedRate(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            mHandler.post(mUpdateProgressTask);
+                        }
+                    }, PROGRESS_UPDATE_INITIAL_INTERVAL,
+                    PROGRESS_UPDATE_INTERNAL, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void stopSeekbarUpdate() {
+        if (mScheduleFuture != null) {
+            mScheduleFuture.cancel(false);
+        }
+    }
+
+    /**
+     * Update the Seekbar
+     */
+    private void updateProgress() {
+        if (mLastPlaybackState == null) {
+            return;
+        }
+        long currentPosition = mLastPlaybackState.getPosition();
+        if (mLastPlaybackState.getState() != PlaybackState.STATE_PAUSED) {
+            long timeDelta = SystemClock.elapsedRealtime() -
+                    mLastPlaybackState.getLastPositionUpdateTime();
+            currentPosition += (int) timeDelta * mLastPlaybackState.getPlaybackSpeed();
+        }
+        mSeekBar.setProgress((int) currentPosition);
+    }
+
+    private void connectToSession(MediaSession.Token token) {
+        MediaController controller = new MediaController(getActivity(), token);
+        getActivity().setMediaController(controller);
+        controller.registerCallback(mCallback);
+        PlaybackState state = controller.getPlaybackState();
+        updateViews(state);
+        updateProgress();
+    }
+
+    private void updateViews(PlaybackState state) {
+        if (state == null) {
+            return;
+        }
+
+        mLastPlaybackState = state;
+        switch (state.getState()) {
+            case PlaybackState.STATE_STOPPED:
+                mPlayPause.setImageDrawable(mPlayDrawable);
+                startSeekbarUpdate();
+                break;
+            case PlaybackState.STATE_PLAYING:
+            case PlaybackState.STATE_BUFFERING:
+                mPlayPause.setImageDrawable(mPauseDrawable);
+                break;
+        }
     }
 }

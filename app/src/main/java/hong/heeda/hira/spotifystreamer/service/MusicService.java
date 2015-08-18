@@ -3,6 +3,7 @@ package hong.heeda.hira.spotifystreamer.service;
 import android.app.Service;
 import android.content.Intent;
 import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -16,24 +17,32 @@ import hong.heeda.hira.spotifystreamer.models.Playlist;
 public class MusicService extends Service {
 
     private static final String TAG = MusicService.class.getSimpleName();
-
-    private MediaPlayback mMediaPlayback;
-
-    private Playlist mPlaylist;
     private final IBinder mMusicBinder = new MusicBinder();
+    private final Playback.Callback mCallback = new Playback.Callback() {
+        @Override
+        public void onCompletion() {
+            updatePlaybackState();
+            stopSelf();
+        }
+
+        @Override
+        public void onPlaybackStatusChanged(int state) {
+            updatePlaybackState();
+        }
+
+        @Override
+        public void onError(String error) {
+
+        }
+
+        @Override
+        public void onMetadataChanged(String mediaId) {
+
+        }
+    };
+    private Playback mMediaPlayback;
+    private Playlist mPlaylist;
     private MediaSession mSession;
-
-    @Override
-    public int onStartCommand(Intent intent,
-                              int flags,
-                              int startId) {
-        return START_STICKY;
-    }
-
-    @Nullable
-    @Override public IBinder onBind(Intent intent) {
-        return mMusicBinder;
-    }
 
     @Override
     public void onCreate() {
@@ -50,28 +59,56 @@ public class MusicService extends Service {
     }
 
     @Override
+    public int onStartCommand(Intent intent,
+                              int flags,
+                              int startId) {
+        return START_STICKY;
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
 
         mSession.release();
     }
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mMusicBinder;
+    }
+
     /**
      * Set the current playlist for the MediaPlayer.
+     *
      * @param playlist
      */
     public void setPlaylist(Playlist playlist) {
         mPlaylist = playlist;
     }
 
+    public MediaSession getSession() {
+        return mSession;
+    }
+
+    private void updatePlaybackState() {
+        int currentState = mMediaPlayback.getState();
+        long position = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+        PlaybackState.Builder builder = new PlaybackState.Builder();
+
+        builder.setState(currentState, position, 1.0f);
+        mSession.setPlaybackState(builder.build());
+    }
+
+    private void playTrack() {
+        //implement exception handling
+        mMediaPlayback.play(mPlaylist.getTrack());
+    }
+
     public class MusicBinder extends Binder {
         public MusicService getService() {
             return MusicService.this;
         }
-    }
-
-    public MediaSession getSession() {
-        return mSession;
     }
 
     private final class MediaSessionCallback extends MediaSession.Callback {
@@ -89,8 +126,7 @@ public class MusicService extends Service {
 
         @Override
         public void onPlay() {
-            //implement exception handling
-            mMediaPlayback.play(mPlaylist.getTrack());
+            playTrack();
         }
 
         @Override
@@ -111,7 +147,8 @@ public class MusicService extends Service {
 
         @Override
         public void onSkipToNext() {
-            mMediaPlayback.skipToNext();
+            mPlaylist.nextTrack();
+            playTrack();
         }
 
         @Override
@@ -129,26 +166,4 @@ public class MusicService extends Service {
             super.onSeekTo(pos);
         }
     }
-
-    private final Playback.Callback mCallback = new Playback.Callback() {
-        @Override
-        public void onCompletion() {
-
-        }
-
-        @Override
-        public void onPlaybackStatusChanged(int state) {
-
-        }
-
-        @Override
-        public void onError(String error) {
-
-        }
-
-        @Override
-        public void onMetadataChanged(String mediaId) {
-
-        }
-    };
 }
