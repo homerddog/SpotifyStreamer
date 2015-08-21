@@ -16,6 +16,8 @@ public interface Playback {
 
     boolean isPlaying();
 
+    void setState(int state);
+
     int getState();
 
     interface Callback {

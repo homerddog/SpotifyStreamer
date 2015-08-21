@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import hong.heeda.hira.spotifystreamer.MediaPlayback;
 import hong.heeda.hira.spotifystreamer.Playback;
 import hong.heeda.hira.spotifystreamer.models.Playlist;
+import hong.heeda.hira.spotifystreamer.models.TrackInfo;
 
 public class MusicService extends Service {
 
@@ -21,6 +22,7 @@ public class MusicService extends Service {
     private final Playback.Callback mCallback = new Playback.Callback() {
         @Override
         public void onCompletion() {
+            mMediaPlayback.stop(true);
             updatePlaybackState();
             stopSelf();
         }
@@ -54,6 +56,7 @@ public class MusicService extends Service {
         mSession.setActive(true);
 
         mMediaPlayback = new MediaPlayback(this);
+        mMediaPlayback.setState(PlaybackState.STATE_NONE);
         mMediaPlayback.setCallback(mCallback);
         mMediaPlayback.start();
     }
@@ -96,13 +99,21 @@ public class MusicService extends Service {
         long position = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
         PlaybackState.Builder builder = new PlaybackState.Builder();
 
+        if (mSession.getController().getPlaybackState() != null) {
+            position = mSession.getController().getPlaybackState().getPosition();
+        }
+
         builder.setState(currentState, position, 1.0f);
         mSession.setPlaybackState(builder.build());
     }
 
     private void playTrack() {
+        TrackInfo track = mPlaylist.getTrack();
+//        MediaMetadata metadata = new MediaMetadata();
+//
+//        mSession.setMetadata(metadata);
         //implement exception handling
-        mMediaPlayback.play(mPlaylist.getTrack());
+        mMediaPlayback.play(track);
     }
 
     public class MusicBinder extends Binder {

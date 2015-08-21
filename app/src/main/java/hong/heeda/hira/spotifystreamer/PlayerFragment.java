@@ -145,7 +145,7 @@ public class PlayerFragment extends DialogFragment {
             public void onProgressChanged(SeekBar seekBar,
                                           int progress,
                                           boolean fromUser) {
-                mCurrentPosition.setText(String.valueOf(progress));
+                mCurrentPosition.setText(String.valueOf(progress / 1000));
                 mFromUser = fromUser;
             }
 
@@ -187,6 +187,11 @@ public class PlayerFragment extends DialogFragment {
                                 controls.play();
                             }
                             startSeekbarUpdate();
+                            break;
+                        case PlaybackState.STATE_PLAYING:
+                        case PlaybackState.STATE_BUFFERING:
+                            stopSeekbarUpdate();
+                            controls.pause();
                             break;
                     }
                 }
@@ -308,6 +313,11 @@ public class PlayerFragment extends DialogFragment {
         PlaybackState state = controller.getPlaybackState();
         updateViews(state);
         updateProgress();
+
+        // TODO: move to private method
+
+        mTrackLength.setText("30");
+        mSeekBar.setMax(30000);
     }
 
     private void updateViews(PlaybackState state) {
@@ -319,11 +329,15 @@ public class PlayerFragment extends DialogFragment {
         switch (state.getState()) {
             case PlaybackState.STATE_STOPPED:
                 mPlayPause.setImageDrawable(mPlayDrawable);
-                startSeekbarUpdate();
+                stopSeekbarUpdate();
                 break;
             case PlaybackState.STATE_PLAYING:
             case PlaybackState.STATE_BUFFERING:
                 mPlayPause.setImageDrawable(mPauseDrawable);
+                startSeekbarUpdate();
+                break;
+            case PlaybackState.STATE_PAUSED:
+                mPlayPause.setImageDrawable(mPlayDrawable);
                 break;
         }
     }

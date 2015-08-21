@@ -20,6 +20,7 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
     private MusicService mMusicService;
     private MediaPlayer mMediaPlayer;
     private int mState;
+    private int mCurrentPosition;
 
     public MediaPlayback(MusicService musicService) {
         mMusicService = musicService;
@@ -44,33 +45,44 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
 
     @Override
     public void pause() {
-
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.pause();
+            mCurrentPosition = mMediaPlayer.getCurrentPosition();
+        }
+        mState = PlaybackState.STATE_PAUSED;
+        notifyListener();
     }
 
     @Override
     public void play(TrackInfo track) {
-        try {
-            initializeMediaPlayer();
+        if (mState == PlaybackState.STATE_PAUSED && mMediaPlayer != null) {
+            configureMediaPlayer();
+        } else {
+            try {
+                initializeMediaPlayer();
 
-            mState = PlaybackState.STATE_BUFFERING;
+                mState = PlaybackState.STATE_BUFFERING;
 
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setDataSource(track.getPreviewUrl());
-            mMediaPlayer.prepareAsync();
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mMediaPlayer.setDataSource(track.getPreviewUrl());
+                mMediaPlayer.prepareAsync();
 
-            //notify listener
-            if (mCallback != null) {
-                mCallback.onPlaybackStatusChanged(mState);
+                notifyListener();
+
+            } catch (Exception e) {
+                Log.d("MediaPlayback", "Exception playing song" + e);
             }
-
-        } catch (Exception e) {
-            Log.d("MediaPlayback", "Exception playing song");
         }
     }
 
     @Override
     public boolean isPlaying() {
         return true;
+    }
+
+    @Override
+    public void setState(int state) {
+        mState = state;
     }
 
     @Override
@@ -103,13 +115,17 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        mp.start();
-        mState = PlaybackState.STATE_PLAYING;
+        configureMediaPlayer();
     }
 
     @Override
     public void onSeekComplete(MediaPlayer mp) {
-        // TODO: implement in the case of continuous top ten tracks playback
+        mCurrentPosition = mMediaPlayer.getCurrentPosition();
+        if (mState == PlaybackState.STATE_BUFFERING) {
+            mMediaPlayer.start();
+            mState = PlaybackState.STATE_PLAYING;
+        }
+        notifyListener();
     }
 
     private void initializeMediaPlayer() {
@@ -125,6 +141,25 @@ public class MediaPlayback implements Playback, OnCompletionListener, OnErrorLis
             mMediaPlayer.setOnSeekCompleteListener(this);
         } else {
             mMediaPlayer.reset();
+        }
+    }
+
+    private void configureMediaPlayer() {
+        if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
+            if (mCurrentPosition == mMediaPlayer.getCurrentPosition()) {
+                mMediaPlayer.start();
+                mState = PlaybackState.STATE_PLAYING;
+            } else {
+                mMediaPlayer.seekTo(mCurrentPosition);
+                mState = PlaybackState.STATE_BUFFERING;
+            }
+        }
+        notifyListener();
+    }
+
+    private void notifyListener() {
+        if (mCallback != null) {
+            mCallback.onPlaybackStatusChanged(mState);
         }
     }
 }
