@@ -19,6 +19,9 @@ public class MusicService extends Service {
 
     private static final String TAG = MusicService.class.getSimpleName();
     private final IBinder mMusicBinder = new MusicBinder();
+    private Playback mMediaPlayback;
+    private Playlist mPlaylist;
+    private MediaSession mSession;
     private final Playback.Callback mCallback = new Playback.Callback() {
         @Override
         public void onCompletion() {
@@ -42,9 +45,6 @@ public class MusicService extends Service {
 
         }
     };
-    private Playback mMediaPlayback;
-    private Playlist mPlaylist;
-    private MediaSession mSession;
 
     @Override
     public void onCreate() {
@@ -103,6 +103,8 @@ public class MusicService extends Service {
             position = mSession.getController().getPlaybackState().getPosition();
         }
 
+        builder.setActions(buildAvailableActions());
+
         builder.setState(currentState, position, 1.0f);
         mSession.setPlaybackState(builder.build());
     }
@@ -114,6 +116,23 @@ public class MusicService extends Service {
 //        mSession.setMetadata(metadata);
         //implement exception handling
         mMediaPlayback.play(track);
+    }
+
+    private long buildAvailableActions() {
+        long actions = PlaybackState.ACTION_PLAY;
+
+        if (mMediaPlayback.isPlaying()) {
+            actions |= PlaybackState.ACTION_PAUSE;
+        }
+
+        if (mPlaylist.getCurrentTrackPosition() > 0) {
+            actions |= PlaybackState.ACTION_SKIP_TO_PREVIOUS;
+        }
+
+        if (mPlaylist.getCurrentTrackPosition() < mPlaylist.getTracks().size() - 1) {
+            actions |= PlaybackState.ACTION_SKIP_TO_NEXT;
+        }
+        return actions;
     }
 
     public class MusicBinder extends Binder {
@@ -164,7 +183,8 @@ public class MusicService extends Service {
 
         @Override
         public void onSkipToPrevious() {
-            super.onSkipToPrevious();
+            mPlaylist.previousTrack();
+            playTrack();
         }
 
         @Override

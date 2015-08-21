@@ -84,4 +84,8 @@ public class Playlist implements Parcelable {
     public void nextTrack() {
         mCurrentTrackPosition++;
     }
+
+    public void previousTrack() {
+        mCurrentTrackPosition--;
+    }
 }

@@ -36,6 +36,9 @@ import hong.heeda.hira.spotifystreamer.models.Playlist;
 import hong.heeda.hira.spotifystreamer.models.TrackInfo;
 import hong.heeda.hira.spotifystreamer.service.MusicService;
 
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 public class PlayerFragment extends DialogFragment {
 
     public static final String FRAGMENT_TAG = "PFTAG";
@@ -157,6 +160,16 @@ public class PlayerFragment extends DialogFragment {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mFromUser = false;
+            }
+        });
+
+        mSkipPrev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MediaController.TransportControls controls =
+                        getActivity().getMediaController().getTransportControls();
+
+                controls.skipToPrevious();;
             }
         });
 
@@ -340,5 +353,10 @@ public class PlayerFragment extends DialogFragment {
                 mPlayPause.setImageDrawable(mPlayDrawable);
                 break;
         }
+
+        mSkipNext.setVisibility((state.getActions() & PlaybackState.ACTION_SKIP_TO_NEXT) == 0
+                ? INVISIBLE : VISIBLE );
+        mSkipPrev.setVisibility((state.getActions() & PlaybackState.ACTION_SKIP_TO_PREVIOUS) == 0
+                ? INVISIBLE : VISIBLE );
     }
 }
